@@ -1,4 +1,4 @@
-package br.com.venture.ventureflow_backend;
+package br.com.venture.ventureflow;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
