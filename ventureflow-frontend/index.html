@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estoque</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">EV</div>
+        <div>
+          <strong>Venture Flow</strong>
+          <span>Gestão interna</span>
+        </div>
+      </div>
+
+      <nav>
+        <a href="#">Visão geral</a>
+        <a href="#" class="active">Estoque</a>
+        <a href="#">Requisições</a>
+        <a href="#">Pedidos</a>
+        <a href="#">Relatórios</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Almoxarifado</p>
+          <h1>Estoque</h1>
+          <p class="subtitle">Consulte e gerencie os produtos disponíveis.</p>
+        </div>
+      </header>
+
+      <section class="search-row">
+        <label class="search-box">
+          <span class="search-icon">⌕</span>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Pesquisar por nome, código ou categoria..."
+            aria-label="Pesquisar produtos"
+          />
+        </label>
+
+        <button class="filter-button" type="button">
+          <span>☷</span>
+          Mais filtros
+        </button>
+      </section>
+
+      <section class="action-bar" aria-label="Ações do estoque">
+        <button type="button">Novo produto</button>
+        <button type="button">Receber produto</button>
+        <button type="button">Requisições</button>
+        <button type="button">Movimentações</button>
+      </section>
+
+      <section class="product-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Produtos</h2>
+            <p><span id="productCount">8</span> produtos encontrados</p>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th>Unidade</th>
+                <th>Saldo</th>
+                <th>Reservado</th>
+                <th>Projeção</th>
+                <th class="actions-column" aria-label="Ações"></th>
+              </tr>
+            </thead>
+            <tbody id="productTable">
+              <tr>
+                <td>CHA-001</td>
+                <td>MDF Branco 15 mm</td>
+                <td>Chapas</td>
+                <td>Chapa</td>
+                <td class="number-cell">42</td>
+                <td class="number-cell">12</td>
+                <td class="number-cell">30</td>
+                <td class="actions-cell"><button class="more-button" aria-label="Mais opções">•••</button></td>
+              </tr>
+              <tr>
+                <td>FER-014</td>
+                <td>Corrediça telescópica 450 mm</td>
+                <td>Ferragens</td>
+                <td>Par</td>
+                <td class="number-cell">18</td>
+                <td class="number-cell">5</td>
+                <td class="number-cell">13</td>
+                <td class="actions-cell"><button class="more-button" aria-label="Mais opções">•••</button></td>
+              </tr>
+              <tr>
+                <td>INS-008</td>
+                <td>Cola de contato 2,8 kg</td>
+                <td>Insumos</td>
+                <td>Lata</td>
+                <td class="number-cell">9</td>
+                <td class="number-cell">4</td>
+                <td class="number-cell">5</td>
+                <td class="actions-cell"><button class="more-button" aria-label="Mais opções">•••</button></td>
+              </tr>
+              <tr>
+                <td>FIT-027</td>
+                <td>Dobradiça curva com amortecimento</td>
+                <td>Ferragens</td>
+                <td>Unidade</td>
+                <td class="number-cell">126</td>
+                <td class="number-cell">36</td>
+                <td class="number-cell">90</td>
+                <td class="actions-cell"><button class="more-button" aria-label="Mais opções">•••</button></td>
+              </tr>
+              <tr>
+                <td>PER-003</td>
+                <td>Perfil puxador de alumínio</td>
+                <td>Perfis</td>
+                <td>Barra</td>
+                <td class="number-cell">17</td>
+                <td class="number-cell">3</td>
+                <td class="number-cell">14</td>
+                <td class="actions-cell"><button class="more-button" aria-label="Mais opções">•••</button></td>
+              </tr>
+              <tr>
+                <td>ACA-011</td>
+                <td>Fita de borda branca 22 mm</td>
+                <td>Acabamentos</td>
+                <td>Rolo</td>
+                <td class="number-cell">16</td>
+                <td class="number-cell">8</td>
+                <td class="number-cell">8</td>
+                <td class="actions-cell"><button class="more-button" aria-label="Mais opções">•••</button></td>
+              </tr>
+              <tr>
+                <td>PAR-019</td>
+                <td>Parafuso 4,0 × 40 mm</td>
+                <td>Fixadores</td>
+                <td>Caixa</td>
+                <td class="number-cell">31</td>
+                <td class="number-cell">7</td>
+                <td class="number-cell">24</td>
+                <td class="actions-cell"><button class="more-button" aria-label="Mais opções">•••</button></td>
+              </tr>
+              <tr>
+                <td>EMB-006</td>
+                <td>Filme stretch 500 mm</td>
+                <td>Embalagem</td>
+                <td>Bobina</td>
+                <td class="number-cell">14</td>
+                <td class="number-cell">6</td>
+                <td class="number-cell">8</td>
+                <td class="actions-cell"><button class="more-button" aria-label="Mais opções">•••</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="empty-state" hidden>
+          Nenhum produto foi encontrado.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById("searchInput");
+    const rows = Array.from(document.querySelectorAll("#productTable tr"));
+    const productCount = document.getElementById("productCount");
+    const emptyState = document.getElementById("emptyState");
+
+    searchInput.addEventListener("input", () => {
+      const value = searchInput.value.trim().toLowerCase();
+      let visibleRows = 0;
+
+      rows.forEach((row) => {
+        const matches = row.innerText.toLowerCase().includes(value);
+        row.hidden = !matches;
+        if (matches) visibleRows++;
+      });
+
+      productCount.textContent = visibleRows;
+      emptyState.hidden = visibleRows !== 0;
+    });
+  </script>
+</body>
+</html>
