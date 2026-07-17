@@ -5,6 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.venture.ventureflow.inventory.dto.ProductRequest;
+import br.com.venture.ventureflow.inventory.dto.ProductResponse;
+import br.com.venture.ventureflow.inventory.dto.ProductUpdateRequest;
 import br.com.venture.ventureflow.inventory.entity.Product;
 import br.com.venture.ventureflow.inventory.exception.ProductNotFoundException;
 import br.com.venture.ventureflow.inventory.repository.ProductRepository;
@@ -18,46 +21,68 @@ public class ProductService {
 		this.productRepository = productRepository;
 	}
 	
-	public Product createProduct(Product product) {
-		return productRepository.save(product);
+	@Transactional
+	public ProductResponse create(ProductRequest request) {
+		Product product = new Product(
+				request.code(), 
+				request.name() , 
+				request.description(), 
+				request.quantity(), 
+				request.unit()
+		);
+		
+		Product savedProduct = productRepository.save(product);
+		return ProductResponse.from(savedProduct);
 	}
 	
-	public List<Product> findAll(Product product){
-		return productRepository.findAll();
+	@Transactional(readOnly = true)
+	public List<ProductResponse> findAll(){
+		return productRepository.findAll().stream().map(ProductResponse::from).toList();
 				
 	}
 	
-	public Product findById(Long id) {
-		return productRepository.findById(id).
-				orElseThrow(() -> new ProductNotFoundException(id));
+	@Transactional(readOnly = true)
+	public ProductResponse findById(Long id) {
+		Product product = findEntityById(id);
+		
+		return ProductResponse.from(product);
+		
+		
 	}
 	
 	@Transactional
-	public Product update(Long id, Product updatedProduct) {
-	    Product existingProduct = findById(id);
+	public ProductResponse update(Long id, ProductUpdateRequest request) {
+	    Product product = findEntityById(id);
 
-	    existingProduct.setCode(updatedProduct.getCode());
-	    existingProduct.setName(updatedProduct.getName());
-	    existingProduct.setDescription(updatedProduct.getDescription());
-	    existingProduct.setQuantity(updatedProduct.getQuantity());
-	    existingProduct.setUnit(updatedProduct.getUnit());
+	    product.setCode(request.code());
+	    product.setName(request.name());
+	    product.setDescription(request.description());
+	    product.setUnit(request.unit());
 
-	    return productRepository.save(existingProduct);
+	    Product savedProduct = productRepository.save(product);
+	    return ProductResponse.from(savedProduct);
 	}
 	
 	@Transactional
-	public Product deactivate(Long id) {
-	    Product product = findById(id);
+	public ProductResponse deactivate(Long id) {
+	    Product product = findEntityById(id);
 	    product.deactivate();
 
-	    return productRepository.save(product);
+	    Product savedProduct = productRepository.save(product);
+
+        return ProductResponse.from(savedProduct);
 	}
 
 	@Transactional
 	public Product activate(Long id) {
-	    Product product = findById(id);
+	    Product product = findEntityById(id);
 	    product.activate();
 
 	    return productRepository.save(product);
+	}
+	
+	private Product findEntityById(Long id) {
+		return productRepository.findById(id).
+				orElseThrow(() -> new ProductNotFoundException(id));
 	}
 }
