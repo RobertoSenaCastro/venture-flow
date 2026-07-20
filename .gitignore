@@ -1,0 +1,25 @@
+# Eclipse
+**/.metadata/
+**/.settings/
+**/.classpath
+**/.project
+
+# Java / Maven
+**/target/
+*.class
+
+# Node / frontend
+**/node_modules/
+**/dist/
+**/build/
+
+# Configurações locais e credenciais
+.env
+.env.*
+!.env.example
+**/application-local.properties
+**/application-secret.properties
+
+# Sistema operacional
+Thumbs.db
+.DS_Store
