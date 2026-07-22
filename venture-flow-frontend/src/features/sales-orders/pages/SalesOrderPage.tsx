@@ -4,13 +4,15 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { 
+import {
   createSalesOrder,
   getSalesOrders,
 } from "../api/salesOrderApi";
 
-import SalesOrderForm from "../components/sales-order/SalesOrderFormProps";
+import SalesOrderForm from "../components/SalesOrderForm";
+import "./SalesOrderPage.css";
 
 import type {
   SalesOrder,
@@ -23,21 +25,36 @@ const INITIAL_FORM_DATA: SalesOrderFormData = {
 };
 
 function SalesOrdersPage() {
-  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+
+  const [openMenuSalesOrderId, setOpenMenuSalesOrderId] =
+    useState<number | null>(null);
+
+  const [isFormOpen, setIsFormOpen] =
+    useState<boolean>(false);
 
   const [formData, setFormData] =
     useState<SalesOrderFormData>(INITIAL_FORM_DATA);
 
   const [salesOrder, setSalesOrder] =
     useState<SalesOrder | null>(null);
-  
+
   const [salesOrders, setSalesOrders] =
     useState<SalesOrder[]>([]);
 
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [loadErrorMessage, setLoadErrorMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] =
+    useState<string>("");
+
+  const [isSubmitting, setIsSubmitting] =
+    useState<boolean>(false);
+
+  const [isLoading, setIsLoading] =
+    useState<boolean>(true);
+
+  const [loadErrorMessage, setLoadErrorMessage] =
+    useState<string>("");
+
+  const navigate =
+    useNavigate();
 
   useEffect(() => {
     async function loadSalesOrders(): Promise<void> {
@@ -63,6 +80,23 @@ function SalesOrdersPage() {
 
     void loadSalesOrders();
   }, []);
+
+  function handleEditSalesOrder(salesOrderId: number): void {
+    setOpenMenuSalesOrderId(null);
+    navigate(`/sales-orders/${salesOrderId}/edit`);
+  }
+
+  function toggleSalesOrderMenu(
+    salesOrderId: number
+  ): void {
+    setOpenMenuSalesOrderId((currentOpenMenuId) => {
+      if (currentOpenMenuId === salesOrderId) {
+        return null;
+      }
+
+      return salesOrderId;
+    });
+  }
 
   function openForm(): void {
     setErrorMessage("");
@@ -179,44 +213,80 @@ function SalesOrdersPage() {
       )}
 
       {!isLoading &&
-  !loadErrorMessage &&
-  salesOrders.length === 0 && (
-    <section className="empty-state">
-      <div className="empty-state-icon">▤</div>
+        !loadErrorMessage &&
+        salesOrders.length === 0 && (
+          <section className="empty-state">
+            <div className="empty-state-icon">▤</div>
 
-      <h2>No sales orders found</h2>
-
-      <p>
-        Click <strong>New sales order</strong> to register one.
-      </p>
-    </section>
-  )}
-
-  {!isLoading &&
-    !loadErrorMessage &&
-    salesOrders.length > 0 && (
-      <section className="sales-orders-list">
-        {salesOrders.map((salesOrder) => (
-          <article
-            className="sales-order-card"
-            key={salesOrder.id}
-          >
-          <div>
-            <strong>{salesOrder.code}</strong>
-            <h2>{salesOrder.name}</h2>
+            <h2>No sales orders found</h2>
 
             <p>
-              {salesOrder.description || "No description"}
+              Click <strong>New sales order</strong> to register one.
             </p>
-          </div>
+          </section>
+        )}
 
-          <div>
-            <span>{salesOrder.status}</span>
-          </div>
-        </article>
-      ))}
-    </section>
-  )}
+      {!isLoading &&
+        !loadErrorMessage &&
+        salesOrders.length > 0 && (
+          <section className="sales-orders-list">
+            {salesOrders.map((salesOrder) => (
+              <article
+                className="sales-order-card"
+                key={salesOrder.id}
+              >
+                <div>
+                  <strong>{salesOrder.code}</strong>
+                  <h2>{salesOrder.name}</h2>
+
+                  <p>
+                    {salesOrder.description || "No description"}
+                  </p>
+                </div>
+
+                <div className="sales-order-card-side">
+                  <span>{salesOrder.status}</span>
+
+
+                  <div className="sales-order-actions">
+
+                    <button
+                      type="button"
+                      className="sales-order-menu-button"
+                      onClick={() => {
+                        toggleSalesOrderMenu(salesOrder.id);
+                      }}
+                      aria-label={
+                        `Open options for ${salesOrder.name}`
+                      }
+                      aria-expanded={
+                        openMenuSalesOrderId === salesOrder.id
+                      }
+                    >
+                      ⋮
+                    </button>
+
+                    {openMenuSalesOrderId === salesOrder.id && (
+                      <div className="sales-order-menu">
+                        <button
+                          type="button"
+                          className="sales-order-menu-item"
+                          onClick={() => {
+                            handleEditSalesOrder(salesOrder.id);
+                          }}
+                        >
+                          Editar PV
+                        </button>
+                      </div>
+                    )}
+
+                  </div>
+                </div>
+              </article>
+            ))}
+          </section>
+        )
+      }
 
       <SalesOrderForm
         isOpen={isFormOpen}

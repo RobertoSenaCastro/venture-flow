@@ -1,4 +1,5 @@
-import { NavLink, type NavLinkRenderProps } from "react-router";
+import { NavLink, type NavLinkRenderProps } from "react-router-dom";
+import "./Sidebar.css";
 
 function getLinkClass({ isActive }: NavLinkRenderProps): string {
   return isActive ? "sidebar-link active" : "sidebar-link";

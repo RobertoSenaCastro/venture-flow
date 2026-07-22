@@ -42,3 +42,25 @@ export async function getSalesOrders(): Promise<SalesOrder[]> {
 
   return response.json() as Promise<SalesOrder[]>;
 }
+
+export async function getSalesOrderById(
+  salesOrderId: number,
+): Promise<SalesOrder> {
+  const response = await fetch(
+    `${SALES_ORDERS_API_URL}/${salesOrderId}`,
+    {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not load the sales order. HTTP ${response.status}`,
+    );
+  }
+
+  return response.json() as Promise<SalesOrder>;
+}

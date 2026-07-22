@@ -3,10 +3,8 @@ import type {
   FormEvent,
 } from "react";
 
-interface SalesOrderFormData {
-  name: string;
-  description: string;
-}
+import type { SalesOrderFormData } from "../types/salesOrder";
+import "./SalesOrderForm.css";
 
 interface SalesOrderFormProps {
   isOpen: boolean;
