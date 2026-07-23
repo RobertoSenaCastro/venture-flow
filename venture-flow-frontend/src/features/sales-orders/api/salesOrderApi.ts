@@ -64,3 +64,28 @@ export async function getSalesOrderById(
 
   return response.json() as Promise<SalesOrder>;
 }
+
+export async function updateSalesOrder(
+  salesOrderId: number,
+  salesOrderData: UpdateSalesOrderRequest,
+): Promise<SalesOrder> {
+  const response = await fetch(
+    `${SALES_ORDERS_API_URL}/${salesOrderId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json; charset=UTF-8",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(salesOrderData),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not update the sales order. HTTP ${response.status}`,
+    );
+  }
+
+  return response.json() as Promise<SalesOrder>;
+}

@@ -5,6 +5,8 @@ import br.com.venture.ventureflow.salesorder.model.dto.SalesOrderResponse;
 import br.com.venture.ventureflow.salesorder.model.entity.SalesOrder;
 import br.com.venture.ventureflow.salesorder.model.repository.SalesOrderRepository;
 import jakarta.persistence.EntityNotFoundException;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,7 +37,17 @@ public class SalesOrderService {
     }
 
     public List<SalesOrderResponse> findAll() {
-        return salesOrderRepository.findByActiveTrue()
+    	Sort sort = Sort.by(
+			Sort.Direction.DESC,
+			"createdAt"
+		).and(
+			Sort.by(
+				Sort.Direction.DESC,
+				"id"
+			)
+		);   			
+    			
+        return salesOrderRepository.findByActiveTrue(sort)
                 .stream()
                 .map(SalesOrderResponse::from)
                 .toList();

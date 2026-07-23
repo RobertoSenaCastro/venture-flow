@@ -24,3 +24,9 @@ export interface SalesOrderFormData {
   name: string;
   description: string;
 }
+
+export interface UpdateSalesOrderRequest {
+  name: string;
+  description: string;
+  status: SalesOrderStatus;
+}
