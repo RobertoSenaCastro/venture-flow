@@ -175,6 +175,39 @@
   margin: 0;
 }
 
+.sales-order-menu-item-danger {
+  color: #b91c1c;
+}
+
+.sales-order-menu-item-danger:hover {
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+.sales-order-menu-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.trash-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.trash-link svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 @media (max-width: 750px) {
   .page-header-row {
     flex-direction: column;

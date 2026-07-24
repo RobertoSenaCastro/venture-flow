@@ -1,5 +1,6 @@
 package br.com.venture.ventureflow.salesorder.controller;
 
+import br.com.venture.ventureflow.salesorder.model.dto.SalesOrderBulkRequest;
 import br.com.venture.ventureflow.salesorder.model.dto.SalesOrderRequest;
 import br.com.venture.ventureflow.salesorder.model.dto.SalesOrderResponse;
 import br.com.venture.ventureflow.salesorder.model.service.SalesOrderService;
@@ -52,10 +53,10 @@ public class SalesOrderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deactivate(
+    public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {
-        salesOrderService.deactivate(id);
+        salesOrderService.softDelete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -65,5 +66,21 @@ public class SalesOrderController {
     ) {
         salesOrderService.activate(id);
         return ResponseEntity.noContent().build();
+    }
+    
+    @PatchMapping("/bulk-soft-delete")
+    public ResponseEntity<Void> softDeleteMany(
+            @RequestBody SalesOrderBulkRequest request
+    ) {
+        salesOrderService.softDeleteMany(request.ids());
+        return ResponseEntity.noContent().build();
+    }
+    
+    @GetMapping("/trash")
+    public ResponseEntity<List<SalesOrderResponse>> findAllSoftDeleted() {
+        List<SalesOrderResponse> salesOrders =
+            salesOrderService.findAllSoftDeleted();
+
+        return ResponseEntity.ok(salesOrders);
     }
 }

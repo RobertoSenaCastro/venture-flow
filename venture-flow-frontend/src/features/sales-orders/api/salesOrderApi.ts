@@ -1,6 +1,7 @@
 import type {
   CreateSalesOrderRequest,
   SalesOrder,
+  UpdateSalesOrderRequest,
 } from "../types/salesOrder";
 
 const SALES_ORDERS_API_URL = "/api/sales-orders";
@@ -88,4 +89,65 @@ export async function updateSalesOrder(
   }
 
   return response.json() as Promise<SalesOrder>;
+}
+
+export async function softDeleteSalesOrder(
+  salesOrderId: number,
+): Promise<void> {
+  const response = await fetch(
+    `${SALES_ORDERS_API_URL}/${salesOrderId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not delete the sales order. HTTP ${response.status}`,
+    );
+  }
+}
+
+export async function getSoftDeletedSalesOrders():
+Promise<SalesOrder[]> {
+  const response = await fetch(
+    `${SALES_ORDERS_API_URL}/trash`,
+    {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not load deleted sales orders. HTTP ${response.status}`,
+    );
+  }
+
+  return response.json() as Promise<SalesOrder[]>;
+}
+
+export async function restoreSalesOrder(
+  salesOrderId: number,
+): Promise<void> {
+  const response = await fetch(
+    `${SALES_ORDERS_API_URL}/${salesOrderId}/activate`,
+    {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not restore the sales order. HTTP ${response.status}`,
+    );
+  }
 }

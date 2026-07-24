@@ -16,8 +16,8 @@ function HomePage() {
         <Link to="/orders" className="module-card">
           <div className="module-icon">▤</div>
           <div>
-            <h2>Orders</h2>
-            <p>Create and manage production orders.</p>
+            <h2>Pedidos de venda</h2>
+            <p>Crie e administre pedidos de venda</p>
           </div>
           <span className="module-arrow">→</span>
         </Link>

@@ -24,7 +24,7 @@ function Sidebar() {
 
         <NavLink to="/orders" className={getLinkClass}>
           <span className="nav-icon">▤</span>
-          Orders
+          Pedidos de venda
         </NavLink>
       </nav>
     </aside>

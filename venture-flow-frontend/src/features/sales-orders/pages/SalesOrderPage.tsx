@@ -4,11 +4,12 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link, } from "react-router-dom";
 
 import {
   createSalesOrder,
   getSalesOrders,
+  softDeleteSalesOrder,
 } from "../api/salesOrderApi";
 
 import SalesOrderForm from "../components/SalesOrderForm";
@@ -55,6 +56,12 @@ function SalesOrdersPage() {
 
   const navigate =
     useNavigate();
+
+  const [deletingSalesOrderId, setDeletingSalesOrderId] =
+    useState<number | null>(null);
+
+  const [deleteErrorMessage, setDeleteErrorMessage] =
+    useState<string>("");
 
   useEffect(() => {
     async function loadSalesOrders(): Promise<void> {
@@ -168,6 +175,43 @@ function SalesOrdersPage() {
     }
   }
 
+  async function handleSoftDeleteSalesOrder(
+    salesOrder: SalesOrder,
+  ): Promise<void> {
+    const confirmed = window.confirm(
+      `Do you want to remove ${salesOrder.code} — ${salesOrder.name}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingSalesOrderId(salesOrder.id);
+    setDeleteErrorMessage("");
+    setOpenMenuSalesOrderId(null);
+
+    try {
+      await softDeleteSalesOrder(salesOrder.id);
+
+      setSalesOrders((currentSalesOrders) =>
+        currentSalesOrders.filter(
+          (currentSalesOrder) =>
+            currentSalesOrder.id !== salesOrder.id,
+        ),
+      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setDeleteErrorMessage(error.message);
+      } else {
+        setDeleteErrorMessage(
+          "An unexpected error occurred while removing the sales order.",
+        );
+      }
+    } finally {
+      setDeletingSalesOrderId(null);
+    }
+  }
+
   return (
     <main className="page">
       <header className="page-header page-header-row">
@@ -181,13 +225,36 @@ function SalesOrdersPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          className="primary-button"
-          onClick={openForm}
-        >
-          Novo Pedido
-        </button>
+        <div className="page-header-actions">
+          <Link
+            to="/sales-orders/trash"
+            className="secondary-button trash-link"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18" />
+              <path d="M8 6V4h8v2" />
+              <path d="M19 6l-1 14H6L5 6" />
+              <path d="M10 11v5" />
+              <path d="M14 11v5" />
+            </svg>
+
+            Lixeira
+          </Link>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={openForm}
+          >
+            Novo Pedido
+          </button>
+        </div>
       </header>
 
       {salesOrder && (
@@ -225,6 +292,12 @@ function SalesOrdersPage() {
             </p>
           </section>
         )}
+
+      {deleteErrorMessage && (
+        <section className="error-message" role="alert">
+          {deleteErrorMessage}
+        </section>
+      )}
 
       {!isLoading &&
         !loadErrorMessage &&
@@ -277,6 +350,22 @@ function SalesOrdersPage() {
                         >
                           Editar PV
                         </button>
+
+                        <button
+                          type="button"
+                          className="sales-order-menu-item sales-order-menu-item-danger"
+                          onClick={() => {
+                            void handleSoftDeleteSalesOrder(salesOrder);
+                          }}
+                          disabled={
+                            deletingSalesOrderId === salesOrder.id
+                          }
+                        >
+                          {deletingSalesOrderId === salesOrder.id
+                            ? "Removing..."
+                            : "Deletar"}
+                        </button>
+
                       </div>
                     )}
 

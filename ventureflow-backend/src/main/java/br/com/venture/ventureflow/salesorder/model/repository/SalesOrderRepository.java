@@ -10,4 +10,6 @@ import java.util.List;
 public interface SalesOrderRepository extends JpaRepository<SalesOrder, Long> {
 
     List<SalesOrder> findByActiveTrue(Sort sort);
+    
+    List<SalesOrder> findByActiveFalse(Sort sort);
 }

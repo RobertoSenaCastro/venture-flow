@@ -8,9 +8,11 @@ import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class SalesOrderService {
@@ -48,9 +50,9 @@ public class SalesOrderService {
 		);   			
     			
         return salesOrderRepository.findByActiveTrue(sort)
-                .stream()
-                .map(SalesOrderResponse::from)
-                .toList();
+	        .stream()
+	        .map(SalesOrderResponse::from)
+	        .toList();
     }
 
     public SalesOrderResponse findById(Long id) {
@@ -69,7 +71,7 @@ public class SalesOrderService {
         return SalesOrderResponse.from(updatedSalesOrder);
     }
 
-    public void deactivate(Long id) {
+    public void softDelete(Long id) {
         SalesOrder salesOrder = findEntityById(id);
         salesOrder.setActive(false);
         salesOrderRepository.save(salesOrder);
@@ -91,5 +93,45 @@ public class SalesOrderService {
     private String generateNextCode() {
         long nextNumber = salesOrderRepository.count() + 1;
         return "PV-%02d".formatted(nextNumber);
+    }
+    
+    @Transactional
+    public void softDeleteMany(Set<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "At least one sales order ID is required."
+            );
+        }
+
+        List<SalesOrder> salesOrders =
+                salesOrderRepository.findAllById(ids);
+
+        if (salesOrders.size() != ids.size()) {
+            throw new EntityNotFoundException(
+                    "One or more sales orders were not found."
+            );
+        }
+
+        salesOrders.forEach(
+                salesOrder -> salesOrder.setActive(false)
+        );
+    }
+    
+    public List<SalesOrderResponse> findAllSoftDeleted() {
+        Sort sort = Sort.by(
+            Sort.Direction.DESC,
+            "createdAt"
+        ).and(
+            Sort.by(
+                Sort.Direction.DESC,
+                "id"
+            )
+        );
+
+        return salesOrderRepository
+            .findByActiveFalse(sort)
+            .stream()
+            .map(SalesOrderResponse::from)
+            .toList();
     }
 }
