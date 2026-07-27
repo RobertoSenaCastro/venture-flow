@@ -1,6 +1,11 @@
 package br.com.venture.ventureflow.salesorder.model.entity;
 
+import br.com.venture.ventureflow.reseller.model.entity.Reseller;
+
 import jakarta.persistence.*;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDateTime;
 
@@ -30,6 +35,16 @@ public class SalesOrder {
 
     @Column(nullable = false)
     private boolean active;
+    
+    @ManyToOne(
+	    fetch = FetchType.LAZY,
+	    optional = false
+	)
+	@JoinColumn(
+	    name = "reseller_id",
+	    nullable = false
+	)
+    private Reseller reseller;
 
     public SalesOrder() {
     }
@@ -38,12 +53,15 @@ public class SalesOrder {
             String code,
             String name,
             String description,
+            Reseller reseller,
             SalesOrderStatus status,
             LocalDateTime createdAt
+            
     ) {
         this.code = code;
         this.name = name;
         this.description = description;
+        this.reseller = reseller;
         this.status = status;
         this.createdAt = createdAt;
         this.active = true;
@@ -96,4 +114,14 @@ public class SalesOrder {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+	public Reseller getReseller() {
+		return reseller;
+	}
+
+	public void setReseller(Reseller reseller) {
+		this.reseller = reseller;
+	}
+    
+    
 }

@@ -3,6 +3,7 @@ package br.com.venture.ventureflow.salesorder.model.dto;
 import br.com.venture.ventureflow.salesorder.model.entity.SalesOrderStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 public record SalesOrderRequest(
@@ -15,7 +16,10 @@ public record SalesOrderRequest(
         String description,
 
         @NotNull(message = "The sales order status is required")
-        SalesOrderStatus status
+        SalesOrderStatus status,
 
+        @NotNull(message = "The reseller is required")
+        @Positive(message = "The reseller ID must be greater than zero")
+        Long resellerId
 ) {
 }
