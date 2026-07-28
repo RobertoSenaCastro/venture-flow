@@ -5,10 +5,12 @@ import br.com.venture.ventureflow.reseller.model.dto.ResellerResponse;
 import br.com.venture.ventureflow.reseller.model.entity.DocumentType;
 import br.com.venture.ventureflow.reseller.model.entity.Reseller;
 import br.com.venture.ventureflow.reseller.model.repository.ResellerRepository;
+import br.com.venture.ventureflow.reseller.model.dto.ResellerOptionResponse;
 
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ResellerService {
@@ -106,5 +108,15 @@ public class ResellerService {
                             + " digits."
             );
         }
+        
     }
+    
+    public List<ResellerOptionResponse> findAllActive() {
+        return resellerRepository
+            .findByActiveTrueOrderByNameAsc()
+            .stream()
+            .map(ResellerOptionResponse::from)
+            .toList();
+    }
+    
 }

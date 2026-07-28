@@ -4,7 +4,12 @@ import type {
   UpdateSalesOrderRequest,
 } from "../types/salesOrder";
 
-const SALES_ORDERS_API_URL = "/api/sales-orders";
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL ?? ""
+).replace(/\/$/, "");
+
+const SALES_ORDERS_API_URL =
+  `${API_BASE_URL}/api/sales-orders`;
 
 export async function createSalesOrder(
   salesOrderData: CreateSalesOrderRequest,
