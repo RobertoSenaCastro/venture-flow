@@ -1,33 +1,54 @@
-HELP.md
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+
+# Backend - Maven
 target/
-.mvn/wrapper/maven-wrapper.jar
+*.log
+
+# Keep source folders even if they contain directories named target/build
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### STS ###
-.apt_generated
+# Spring Tool Suite / Eclipse
+.apt_generated/
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
-.sts4-cache
+.sts4-cache/
+.metadata/
 
-### IntelliJ IDEA ###
-.idea
+# IntelliJ IDEA
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
 build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
+# Frontend - Node and Vite
+**/node_modules/
+**/dist/
+**/.vite/
+
+# VS Code
 .vscode/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
