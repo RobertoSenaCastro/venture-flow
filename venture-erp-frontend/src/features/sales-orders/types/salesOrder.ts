@@ -8,6 +8,7 @@ export interface CreateSalesOrderRequest {
   name: string;
   description: string;
   status: SalesOrderStatus;
+  resellerId: number;
 }
 
 export interface SalesOrder {
@@ -18,6 +19,8 @@ export interface SalesOrder {
   status: SalesOrderStatus;
   active: boolean;
   createdAt: string;
+  resellerId: number;
+  resellerName: string;
 }
 
 export interface SalesOrderFormData {
