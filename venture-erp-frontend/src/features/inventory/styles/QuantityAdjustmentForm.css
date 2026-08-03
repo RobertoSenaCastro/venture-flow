@@ -1,0 +1,72 @@
+/*
+ * The modal shell (modal-overlay, modal-content, modal-header,
+ * modal-close-button, form-actions) comes from SalesOrderForm.css.
+ * Only the quantity-specific rules live here.
+ */
+
+.quantity-adjustment-summary {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 16px;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.quantity-adjustment-summary div {
+  display: grid;
+  gap: 4px;
+}
+
+.quantity-adjustment-summary span {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.quantity-adjustment-summary strong {
+  color: #1e293b;
+}
+
+.quantity-adjustment-form {
+  display: grid;
+  gap: 20px;
+}
+
+.quantity-adjustment-form label {
+  display: grid;
+  gap: 8px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.quantity-adjustment-form input,
+.quantity-adjustment-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  outline: none;
+  background: white;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 400;
+}
+
+.quantity-adjustment-form input:focus,
+.quantity-adjustment-form textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+}
+
+.quantity-adjustment-form input:disabled,
+.quantity-adjustment-form textarea:disabled {
+  cursor: not-allowed;
+  background: #f1f5f9;
+  opacity: 0.75;
+}
+
+.quantity-adjustment-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}

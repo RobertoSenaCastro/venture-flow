@@ -11,9 +11,22 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Converts selected application exceptions into consistent REST error bodies.
+ *
+ * <p>Missing JPA entities become HTTP 404 responses, while Bean Validation
+ * failures become HTTP 400 responses grouped by field. Exceptions not declared
+ * here continue through Spring's default error handling.</p>
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Builds the not-found response used for missing sales orders.
+     *
+     * @param exception exception containing the missing-resource message
+     * @return timestamped HTTP 404 body
+     */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleEntityNotFound(
             EntityNotFoundException exception
@@ -30,6 +43,15 @@ public class GlobalExceptionHandler {
                 .body(body);
     }
 
+    /**
+     * Converts request-body Bean Validation failures into field messages.
+     *
+     * <p>If a field has multiple failures, the map retains the last message
+     * encountered for that field.</p>
+     *
+     * @param exception validation exception raised by Spring MVC
+     * @return timestamped HTTP 400 body with a field-to-message map
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(
             MethodArgumentNotValidException exception

@@ -2,8 +2,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Sidebar from "./app/layout/Sidebar";
 import HomePage from "./features/home/pages/HomePage";
 import OrdersPage from "./features/sales-orders/pages/SalesOrderPage";
-import SalesOrderEditPage from "./features/sales-orders/pages/SalesOrderEditPage";
-import SalesOrderTrashPage from "./features/sales-orders/pages/SalesOrderTrashPage";
+import SalesOrderEditPage from "./features/sales-orders/pages/EditSalesOrderPage";
+import SalesOrderTrashPage from "./features/sales-orders/pages/TrashSalesOrderPage";
+import { CreateSalesOrderPage } from "./features/sales-orders/pages/CreateSalesOrderPage";
 import "./App.css";
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
       <Sidebar />
       <div className="app-content">
         <Routes>
+          <Route path="/orders/new" element={<CreateSalesOrderPage/>} />
           <Route path="/" element={<HomePage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

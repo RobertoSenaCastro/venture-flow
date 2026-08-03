@@ -6,6 +6,17 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Input contract shared by sales-order creation and full update.
+ *
+ * <p>The reseller identifier is mandatory because every order must reference
+ * a reseller. The service additionally requires that reseller to be active.</p>
+ *
+ * @param name required display name, limited to 150 characters
+ * @param description optional description, limited to 500 characters
+ * @param status persisted lifecycle status supplied by the caller
+ * @param resellerId identifier of the reseller associated with the order
+ */
 public record SalesOrderRequest(
 
         @NotBlank(message = "The sales order name is required")

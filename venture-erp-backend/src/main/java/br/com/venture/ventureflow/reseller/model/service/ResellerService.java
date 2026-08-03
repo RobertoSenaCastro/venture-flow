@@ -12,6 +12,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Applies reseller registration rules and provides active reseller options.
+ *
+ * <p>Names are trimmed, CPF/CNPJ values are stored with digits only, and
+ * duplicate normalized documents are rejected before persistence.</p>
+ */
 @Service
 public class ResellerService {
 
@@ -23,6 +29,14 @@ public class ResellerService {
         this.resellerRepository = resellerRepository;
     }
 
+    /**
+     * Registers an active reseller after normalizing and validating its input.
+     *
+     * @param request reseller data supplied by the API
+     * @return the persisted reseller represented as an API response
+     * @throws IllegalArgumentException if required data is missing, the
+     * document length is invalid, or the document is already registered
+     */
     public ResellerResponse create(
             ResellerRequest request
     ) {
@@ -60,6 +74,13 @@ public class ResellerService {
         return ResellerResponse.from(savedReseller);
     }
 
+    /**
+     * Requires a nonblank name and removes surrounding whitespace.
+     *
+     * @param name raw name from the request
+     * @return trimmed name
+     * @throws IllegalArgumentException if the value is null or blank
+     */
     private String normalizeName(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException(
@@ -70,6 +91,14 @@ public class ResellerService {
         return name.trim();
     }
 
+    /**
+     * Converts a formatted CPF or CNPJ to the representation stored in the
+     * database.
+     *
+     * @param documentNumber raw document text
+     * @return document containing digits only
+     * @throws IllegalArgumentException if the value is null or blank
+     */
     private String normalizeDocument(
             String documentNumber
     ) {
@@ -82,9 +111,21 @@ public class ResellerService {
             );
         }
 
+        // Formatting punctuation is intentionally discarded before validation
+        // and uniqueness checks so formatted and unformatted values match.
         return documentNumber.replaceAll("\\D", "");
     }
 
+    /**
+     * Validates the normalized digit count for the selected document type.
+     *
+     * <p>This method does not calculate CPF or CNPJ check digits.</p>
+     *
+     * @param documentType CPF or CNPJ classification
+     * @param documentNumber normalized digit-only value
+     * @throws IllegalArgumentException if the type is absent or the digit count
+     * does not match the selected type
+     */
     private void validateDocument(
             DocumentType documentType,
             String documentNumber
@@ -111,6 +152,12 @@ public class ResellerService {
         
     }
     
+    /**
+     * Returns the resellers currently eligible for sales-order association,
+     * ordered alphabetically and mapped to compact option DTOs.
+     *
+     * @return active reseller options
+     */
     public List<ResellerOptionResponse> findAllActive() {
         return resellerRepository
             .findByActiveTrueOrderByNameAsc()

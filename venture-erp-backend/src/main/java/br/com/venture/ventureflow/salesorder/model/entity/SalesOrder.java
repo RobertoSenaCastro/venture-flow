@@ -9,6 +9,13 @@ import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDateTime;
 
+/**
+ * Persisted sales-order record.
+ *
+ * <p>Every order has a unique generated code and a required reseller. Deletion
+ * is logical: the {@code active} flag determines whether the order appears in
+ * the normal list or the trash.</p>
+ */
 @Entity
 @Table(name = "sales_orders")
 public class SalesOrder {
@@ -36,6 +43,8 @@ public class SalesOrder {
     @Column(nullable = false)
     private boolean active;
     
+    // No cascade is configured: an order references an existing reseller and
+    // cannot create, update, or delete that reseller through this association.
     @ManyToOne(
 	    fetch = FetchType.LAZY,
 	    optional = false

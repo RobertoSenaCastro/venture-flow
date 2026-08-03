@@ -8,7 +8,7 @@ import {
 
 import type { SalesOrder } from "../types/salesOrder";
 
-import "./SalesOrderPage.css";
+import "../styles/SalesOrderPage.css";
 
 function SalesOrderTrashPage() {
   const [deletedSalesOrders, setDeletedSalesOrders] =

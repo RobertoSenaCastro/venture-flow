@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./styles/reset.css";
 import "./styles/global.css";
+import "./features/sales-orders/styles/buttons.css";
 
 const rootElement = document.getElementById("root");
 

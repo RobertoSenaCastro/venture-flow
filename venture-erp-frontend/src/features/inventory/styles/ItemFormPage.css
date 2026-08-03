@@ -1,0 +1,262 @@
+/*
+ * Shared by the create and edit item pages, which use the same field
+ * set and only differ in their header and actions.
+ */
+
+.item-form-page {
+  width: min(820px, 100%);
+}
+
+.item-form-header {
+  margin-bottom: 24px;
+}
+
+.item-form-header h1 {
+  margin: 4px 0 8px;
+}
+
+.item-form-card {
+  padding: 28px;
+  border: 1px solid #e2e7ee;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 6%);
+}
+
+.item-form {
+  display: grid;
+  gap: 22px;
+}
+
+.item-form-summary {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.item-form-summary div {
+  display: grid;
+  gap: 4px;
+}
+
+.item-form-summary span {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.item-form-summary strong {
+  color: #1e293b;
+}
+
+/* Two fields side by side, such as code and unit. */
+.item-form-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2fr) minmax(0, 1fr);
+  gap: 22px;
+}
+
+.item-form-field {
+  display: grid;
+  gap: 8px;
+}
+
+.item-form-field label,
+.item-form-label {
+  color: #334155;
+  font-weight: 700;
+}
+
+.item-form-hint {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.item-form-field input[type="text"],
+.item-form-field textarea,
+.item-form-field select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  outline: none;
+  background: white;
+  color: #0f172a;
+  font: inherit;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.item-form-field input[type="text"]:focus,
+.item-form-field textarea:focus,
+.item-form-field select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+}
+
+.item-form-field input:disabled,
+.item-form-field textarea:disabled,
+.item-form-field select:disabled {
+  cursor: not-allowed;
+  background: #f1f5f9;
+  opacity: 0.75;
+}
+
+.item-form-field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.item-form-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.item-form-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  cursor: pointer;
+  background: white;
+  color: #334155;
+  font-weight: 600;
+}
+
+.item-form-checkbox:has(input:checked) {
+  border-color: #2563eb;
+  color: #1d4ed8;
+  background: #eff6ff;
+}
+
+.item-form-checkbox:has(input:focus-visible) {
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+}
+
+.item-form-checkbox input {
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.item-form-alias-row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.item-form-alias-row input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  outline: none;
+  background: white;
+  color: #0f172a;
+  font: inherit;
+}
+
+.item-form-alias-row input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+}
+
+.item-form-alias-remove {
+  display: grid;
+  width: 44px;
+  place-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  color: #b91c1c;
+  background: white;
+  cursor: pointer;
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.item-form-alias-remove:hover:not(:disabled) {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.item-form-alias-add {
+  justify-self: start;
+  padding: 9px 14px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 9px;
+  color: #1d4ed8;
+  background: white;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.item-form-alias-add:hover:not(:disabled) {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.item-form-alias-add:disabled,
+.item-form-alias-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.item-form-message {
+  padding: 12px 14px;
+  border: 1px solid;
+  border-radius: 9px;
+}
+
+.item-form-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.item-form-success {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.item-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+@media (max-width: 750px) {
+  .item-form-card {
+    padding: 20px;
+  }
+
+  .item-form-row,
+  .item-form-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .item-form-alias-row {
+    grid-template-columns:
+      minmax(0, 1fr) auto;
+  }
+
+  /* Full-width buttons improve usability on narrow screens. */
+  .item-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .item-form-actions button {
+    width: 100%;
+  }
+}

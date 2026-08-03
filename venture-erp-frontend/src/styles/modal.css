@@ -1,0 +1,66 @@
+/*
+ * Shared modal shell, following the same approach as buttons.css.
+ *
+ * These rules already existed inside SalesOrderForm.css. They were moved
+ * here so that any feature can open a modal without depending on the
+ * sales order stylesheet being loaded. The duplicated block can be
+ * removed from SalesOrderForm.css.
+ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(15 23 42 / 55%);
+}
+
+.modal-content {
+  width: min(540px, 100%);
+  padding: 26px;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 25%);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-close-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  cursor: pointer;
+  font-size: 1.4rem;
+}
+
+.modal-close-button:hover {
+  background: #e2e8f0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 750px) {
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}

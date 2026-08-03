@@ -1,0 +1,84 @@
+/*
+ * The category list reuses the item card classes and the modal shell
+ * from SalesOrderForm.css.
+ */
+
+.category-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.category-delete-button {
+  min-height: 43px;
+  padding: 0 18px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  color: #b91c1c;
+  background: white;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.category-delete-button:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.category-delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.category-form {
+  display: grid;
+  gap: 20px;
+}
+
+.category-form label {
+  display: grid;
+  gap: 8px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.category-form input,
+.category-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  outline: none;
+  background: white;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 400;
+}
+
+.category-form input:focus,
+.category-form textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+}
+
+.category-form input:disabled,
+.category-form textarea:disabled {
+  cursor: not-allowed;
+  background: #f1f5f9;
+  opacity: 0.75;
+}
+
+.category-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+@media (max-width: 750px) {
+  .category-card-actions {
+    width: 100%;
+  }
+
+  .category-card-actions button {
+    flex: 1;
+  }
+}

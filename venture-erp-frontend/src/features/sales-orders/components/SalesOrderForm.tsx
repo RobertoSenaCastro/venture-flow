@@ -4,7 +4,7 @@ import type {
 } from "react";
 
 import type { SalesOrderFormData } from "../types/salesOrder";
-import "./SalesOrderForm.css";
+import "../styles/SalesOrderForm.css";
 
 interface SalesOrderFormProps {
   isOpen: boolean;

@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * REST entry point for reseller registration and active-reseller options.
+ *
+ * <p>The controller delegates normalization, document checks, uniqueness, and
+ * persistence to {@link ResellerService}.</p>
+ */
 @RestController
 @RequestMapping("/api/resellers")
 public class ResellerController {
@@ -27,6 +33,12 @@ public class ResellerController {
         this.resellerService = resellerService;
     }
 
+    /**
+     * Registers a reseller using the service's manual validation rules.
+     *
+     * @param request reseller name, document type, and document number
+     * @return the persisted reseller with HTTP status 201
+     */
     @PostMapping
     public ResponseEntity<ResellerResponse> create(
             @RequestBody ResellerRequest request
@@ -39,6 +51,11 @@ public class ResellerController {
                 .body(createdReseller);
     }
     
+    /**
+     * Lists active resellers as compact options ordered by name.
+     *
+     * @return active reseller identifiers and names
+     */
     @GetMapping
     public ResponseEntity<List<ResellerOptionResponse>>
     findAllActive() {

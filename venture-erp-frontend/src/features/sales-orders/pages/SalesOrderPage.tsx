@@ -1,52 +1,33 @@
+import "../styles/SalesOrderPage.css";
+
 import {
   useEffect,
   useState,
-  type ChangeEvent,
-  type FormEvent,
 } from "react";
-import { useNavigate, Link, } from "react-router-dom";
 
 import {
-  createSalesOrder,
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import {
   getSalesOrders,
   softDeleteSalesOrder,
 } from "../api/salesOrderApi";
 
-import SalesOrderForm from "../components/SalesOrderForm";
-import "./SalesOrderPage.css";
-
-import type {
-  SalesOrder,
-  SalesOrderFormData,
-} from "../types/salesOrder";
-
-const INITIAL_FORM_DATA: SalesOrderFormData = {
-  name: "",
-  description: "",
-};
+import type { SalesOrder } from
+  "../types/salesOrder";
 
 function SalesOrdersPage() {
+  const navigate = useNavigate();
 
-  const [openMenuSalesOrderId, setOpenMenuSalesOrderId] =
-    useState<number | null>(null);
-
-  const [isFormOpen, setIsFormOpen] =
-    useState<boolean>(false);
-
-  const [formData, setFormData] =
-    useState<SalesOrderFormData>(INITIAL_FORM_DATA);
-
-  const [salesOrder, setSalesOrder] =
-    useState<SalesOrder | null>(null);
+  const [
+    openMenuSalesOrderId,
+    setOpenMenuSalesOrderId,
+  ] = useState<number | null>(null);
 
   const [salesOrders, setSalesOrders] =
     useState<SalesOrder[]>([]);
-
-  const [errorMessage, setErrorMessage] =
-    useState<string>("");
-
-  const [isSubmitting, setIsSubmitting] =
-    useState<boolean>(false);
 
   const [isLoading, setIsLoading] =
     useState<boolean>(true);
@@ -54,11 +35,10 @@ function SalesOrdersPage() {
   const [loadErrorMessage, setLoadErrorMessage] =
     useState<string>("");
 
-  const navigate =
-    useNavigate();
-
-  const [deletingSalesOrderId, setDeletingSalesOrderId] =
-    useState<number | null>(null);
+  const [
+    deletingSalesOrderId,
+    setDeletingSalesOrderId,
+  ] = useState<number | null>(null);
 
   const [deleteErrorMessage, setDeleteErrorMessage] =
     useState<string>("");
@@ -69,7 +49,8 @@ function SalesOrdersPage() {
       setLoadErrorMessage("");
 
       try {
-        const loadedSalesOrders = await getSalesOrders();
+        const loadedSalesOrders =
+          await getSalesOrders();
 
         setSalesOrders(loadedSalesOrders);
       } catch (error: unknown) {
@@ -88,91 +69,32 @@ function SalesOrdersPage() {
     void loadSalesOrders();
   }, []);
 
-  function handleEditSalesOrder(salesOrderId: number): void {
+  function handleCreateSalesOrder(): void {
+    navigate("/orders/new");
+  }
+
+  function handleEditSalesOrder(
+    salesOrderId: number,
+  ): void {
     setOpenMenuSalesOrderId(null);
-    navigate(`/sales-orders/${salesOrderId}/edit`);
+
+    navigate(
+      `/sales-orders/${salesOrderId}/edit`,
+    );
   }
 
   function toggleSalesOrderMenu(
-    salesOrderId: number
+    salesOrderId: number,
   ): void {
-    setOpenMenuSalesOrderId((currentOpenMenuId) => {
-      if (currentOpenMenuId === salesOrderId) {
-        return null;
-      }
+    setOpenMenuSalesOrderId(
+      (currentOpenMenuId) => {
+        if (currentOpenMenuId === salesOrderId) {
+          return null;
+        }
 
-      return salesOrderId;
-    });
-  }
-
-  function openForm(): void {
-    setErrorMessage("");
-    setIsFormOpen(true);
-  }
-
-  function closeForm(): void {
-    if (isSubmitting) {
-      return;
-    }
-
-    setIsFormOpen(false);
-    setErrorMessage("");
-    setFormData(INITIAL_FORM_DATA);
-  }
-
-  function handleInputChange(
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ): void {
-    const { name, value } = event.target;
-
-    setFormData((currentFormData) => ({
-      ...currentFormData,
-      [name]: value,
-    }));
-  }
-
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ): Promise<void> {
-    event.preventDefault();
-
-    const trimmedName = formData.name.trim();
-    const trimmedDescription = formData.description.trim();
-
-    if (!trimmedName) {
-      setErrorMessage("The sales order name is required.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setErrorMessage("");
-    setSalesOrder(null);
-
-    try {
-      const createdSalesOrder = await createSalesOrder({
-        name: trimmedName,
-        description: trimmedDescription,
-        status: "CREATED",
-      });
-
-      setSalesOrder(createdSalesOrder);
-
-      setSalesOrders((currentSalesOrders) => [
-        createdSalesOrder,
-        ...currentSalesOrders,
-      ]);
-
-      setFormData(INITIAL_FORM_DATA);
-      setIsFormOpen(false);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage("An unexpected error occurred.");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+        return salesOrderId;
+      },
+    );
   }
 
   async function handleSoftDeleteSalesOrder(
@@ -193,6 +115,8 @@ function SalesOrdersPage() {
     try {
       await softDeleteSalesOrder(salesOrder.id);
 
+      // Remove the deleted order from the current list without
+      // requesting the complete list from the backend again.
       setSalesOrders((currentSalesOrders) =>
         currentSalesOrders.filter(
           (currentSalesOrder) =>
@@ -216,12 +140,15 @@ function SalesOrdersPage() {
     <main className="page">
       <header className="page-header page-header-row">
         <div>
-          <p className="eyebrow">Management</p>
+          <p className="eyebrow">
+            Management
+          </p>
 
           <h1>Pedido de Venda</h1>
 
           <p className="page-description">
-            Create and manage customer sales orders.
+            Create and manage customer sales
+            orders.
           </p>
         </div>
 
@@ -250,22 +177,12 @@ function SalesOrdersPage() {
           <button
             type="button"
             className="primary-button"
-            onClick={openForm}
+            onClick={handleCreateSalesOrder}
           >
             Novo Pedido
           </button>
         </div>
       </header>
-
-      {salesOrder && (
-        <section className="success-message" role="status">
-          <strong>Sales order created successfully.</strong>
-
-          <span>
-            {salesOrder.code} — {salesOrder.name}
-          </span>
-        </section>
-      )}
 
       {isLoading && (
         <section className="details-card">
@@ -274,8 +191,20 @@ function SalesOrdersPage() {
       )}
 
       {loadErrorMessage && (
-        <section className="error-message" role="alert">
+        <section
+          className="error-message"
+          role="alert"
+        >
           {loadErrorMessage}
+        </section>
+      )}
+
+      {deleteErrorMessage && (
+        <section
+          className="error-message"
+          role="alert"
+        >
+          {deleteErrorMessage}
         </section>
       )}
 
@@ -283,21 +212,19 @@ function SalesOrdersPage() {
         !loadErrorMessage &&
         salesOrders.length === 0 && (
           <section className="empty-state">
-            <div className="empty-state-icon">▤</div>
+            <div className="empty-state-icon">
+              ▤
+            </div>
 
             <h2>No sales orders found</h2>
 
             <p>
-              Click <strong>New sales order</strong> to register one.
+              Click{" "}
+              <strong>New sales order</strong>{" "}
+              to register one.
             </p>
           </section>
         )}
-
-      {deleteErrorMessage && (
-        <section className="error-message" role="alert">
-          {deleteErrorMessage}
-        </section>
-      )}
 
       {!isLoading &&
         !loadErrorMessage &&
@@ -309,43 +236,53 @@ function SalesOrdersPage() {
                 key={salesOrder.id}
               >
                 <div>
-                  <strong>{salesOrder.code}</strong>
+                  <strong>
+                    {salesOrder.code}
+                  </strong>
+
                   <h2>{salesOrder.name}</h2>
 
                   <p>
-                    {salesOrder.description || "No description"}
+                    {salesOrder.description ||
+                      "No description"}
                   </p>
                 </div>
 
                 <div className="sales-order-card-side">
-                  <span>{salesOrder.status}</span>
-
+                  <span>
+                    {salesOrder.status}
+                  </span>
 
                   <div className="sales-order-actions">
-
                     <button
                       type="button"
                       className="sales-order-menu-button"
                       onClick={() => {
-                        toggleSalesOrderMenu(salesOrder.id);
+                        toggleSalesOrderMenu(
+                          salesOrder.id,
+                        );
                       }}
                       aria-label={
                         `Open options for ${salesOrder.name}`
                       }
                       aria-expanded={
-                        openMenuSalesOrderId === salesOrder.id
+                        openMenuSalesOrderId ===
+                        salesOrder.id
                       }
                     >
                       ⋮
                     </button>
 
-                    {openMenuSalesOrderId === salesOrder.id && (
+                    {openMenuSalesOrderId ===
+                      salesOrder.id && (
                       <div className="sales-order-menu">
                         <button
                           type="button"
                           className="sales-order-menu-item"
                           onClick={() => {
-                            handleEditSalesOrder(salesOrder.id);
+                            handleEditSalesOrder(
+                              salesOrder.id,
+                            );
                           }}
                         >
                           Editar PV
@@ -353,39 +290,33 @@ function SalesOrdersPage() {
 
                         <button
                           type="button"
-                          className="sales-order-menu-item sales-order-menu-item-danger"
+                          className={
+                            "sales-order-menu-item " +
+                            "sales-order-menu-item-danger"
+                          }
                           onClick={() => {
-                            void handleSoftDeleteSalesOrder(salesOrder);
+                            void handleSoftDeleteSalesOrder(
+                              salesOrder,
+                            );
                           }}
                           disabled={
-                            deletingSalesOrderId === salesOrder.id
+                            deletingSalesOrderId ===
+                            salesOrder.id
                           }
                         >
-                          {deletingSalesOrderId === salesOrder.id
+                          {deletingSalesOrderId ===
+                          salesOrder.id
                             ? "Removing..."
                             : "Deletar"}
                         </button>
-
                       </div>
                     )}
-
                   </div>
                 </div>
               </article>
             ))}
           </section>
-        )
-      }
-
-      <SalesOrderForm
-        isOpen={isFormOpen}
-        formData={formData}
-        isSubmitting={isSubmitting}
-        errorMessage={errorMessage}
-        onChange={handleInputChange}
-        onClose={closeForm}
-        onSubmit={handleSubmit}
-      />
+        )}
     </main>
   );
 }

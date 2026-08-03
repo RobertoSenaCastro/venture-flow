@@ -4,6 +4,13 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Persisted reseller that may be associated with sales orders.
+ *
+ * <p>Document numbers are stored without punctuation and are globally unique.
+ * The active flag controls whether the reseller is listed or accepted during
+ * sales-order creation and update.</p>
+ */
 @Entity
 @Table(
     name = "resellers",
@@ -36,6 +43,8 @@ public class Reseller {
         nullable = false,
         length = 14
     )
+    // Uniqueness is declared by the table constraint above; the service also
+    // checks before insertion to provide an earlier failure.
     private String documentNumber;
 
     @Column(nullable = false)

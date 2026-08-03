@@ -11,6 +11,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * Persisted product catalog entry with a current quantity and unit.
+ *
+ * <p>The model has no relationships to sales orders or stock movements. Its
+ * active flag supports deactivation without physical deletion.</p>
+ */
 @Entity
 @Table(name = "products")
 public class Product {
@@ -104,10 +110,16 @@ public class Product {
         return active;
     }
     
+    /**
+     * Marks the product as available without changing its other fields.
+     */
     public void activate() {
         this.active = true;
     }
 
+    /**
+     * Marks the product as inactive without deleting its database row.
+     */
     public void deactivate() {
         this.active = false;
     }
