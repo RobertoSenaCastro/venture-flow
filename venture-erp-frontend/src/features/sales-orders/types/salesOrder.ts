@@ -32,4 +32,5 @@ export interface UpdateSalesOrderRequest {
   name: string;
   description: string;
   status: SalesOrderStatus;
+  resellerId: number;
 }
