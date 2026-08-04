@@ -107,7 +107,7 @@ export function CreateSalesOrderPage() {
         });
 
         // Return to the list only after the backend confirms the creation.
-        navigate("/orders");
+        navigate("/sales-orders");
     } catch (error: unknown) {
         if (error instanceof Error) {
             setSubmitError(error.message);
@@ -239,7 +239,7 @@ export function CreateSalesOrderPage() {
                         type="button"
                         className="secondary-button"
                         onClick={() => {
-                            navigate("/orders");
+                            navigate("/sales-orders");
                         }}
                         disabled={isSubmitting}
                     >

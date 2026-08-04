@@ -22,9 +22,13 @@ function Sidebar() {
           Home
         </NavLink>
 
-        <NavLink to="/orders" className={getLinkClass}>
+        <NavLink to="/sales-orders" className={getLinkClass}>
           <span className="nav-icon">▤</span>
           Pedidos de venda
+        </NavLink>
+
+        <NavLink to="/items" className={getLinkClass}>
+          Estoque
         </NavLink>
       </nav>
     </aside>

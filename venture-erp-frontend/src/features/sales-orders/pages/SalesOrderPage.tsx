@@ -70,7 +70,7 @@ function SalesOrdersPage() {
   }, []);
 
   function handleCreateSalesOrder(): void {
-    navigate("/orders/new");
+    navigate("/sales-orders/new");
   }
 
   function handleEditSalesOrder(
