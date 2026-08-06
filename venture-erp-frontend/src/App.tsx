@@ -19,8 +19,9 @@ function App() {
       <Sidebar />
       <div className="app-content">
         <Routes>
-          <Route path="sales-orders/new" element={<CreateSalesOrderPage />} />
           <Route path="/" element={<HomePage />} />
+
+          <Route path="sales-orders/new" element={<CreateSalesOrderPage />} />
           <Route path="/sales-orders" element={<OrdersPage />} />
           <Route path="/sales-orders/:salesOrderId/edit" element={<SalesOrderEditPage />} />
           <Route path="/sales-orders/trash" element={<SalesOrderTrashPage />} />
