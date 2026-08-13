@@ -3,6 +3,7 @@ package br.com.venture.ventureflow.reseller.model.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import br.com.venture.ventureflow.reseller.model.entity.Reseller;
@@ -19,6 +20,8 @@ public interface ResellerRepository extends JpaRepository<Reseller, Long> {
 	 * @return whether the document is already persisted
 	 */
 	boolean existsByDocumentNumber(String documentNumber);
+
+    boolean existsByDocumentNumberAndIdNot(String documentNumber, Long id);
 	
 	/**
 	 * Resolves a reseller that may be assigned to a sales order.
@@ -34,4 +37,8 @@ public interface ResellerRepository extends JpaRepository<Reseller, Long> {
 	 * @return active resellers ordered by name ascending
 	 */
 	List<Reseller> findByActiveTrueOrderByNameAsc();
+
+    List<Reseller> findAllByActiveTrue(Sort sort);
+
+    List<Reseller> findAllByActiveFalse(Sort sort);
 }

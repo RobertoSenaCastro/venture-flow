@@ -14,13 +14,15 @@ import br.com.venture.ventureflow.reseller.model.entity.Reseller;
  * @param documentNumber digit-only document number
  * @param active whether the reseller can be selected for new or updated orders
  * @param createdAt creation timestamp assigned by the service
+ * @param updatedAt last-update timestamp maintained by the entity lifecycle
  */
 public record ResellerResponse(Long id,
         String name,
         DocumentType documentType,
         String documentNumber,
         boolean active,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
 	/**
 	 * Converts the persistence entity into the public response contract.
@@ -35,7 +37,8 @@ public record ResellerResponse(Long id,
                 reseller.getDocumentType(),
                 reseller.getDocumentNumber(),
                 reseller.isActive(),
-                reseller.getCreatedAt()
+                reseller.getCreatedAt(),
+                reseller.getUpdatedAt()
             );
 	}
 }
