@@ -9,7 +9,7 @@ package br.com.venture.ventureflow.user.model.entity;
 public enum UserRole {
 
     /** Works for the factory. Sees everything. Must not reference a reseller. */
-    EMPLOYEE,
+    ADMIN,
 
     /** Works for a reseller. Sees only the sales orders assigned to them. */
     ASSEMBLY_SUPERVISOR

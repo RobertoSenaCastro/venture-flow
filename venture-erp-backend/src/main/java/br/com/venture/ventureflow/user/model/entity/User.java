@@ -62,7 +62,7 @@ public class User {
 
     /**
      * Required for {@link UserRole#ASSEMBLY_SUPERVISOR}, forbidden for
-     * {@link UserRole#EMPLOYEE}. The rule lives in the service because the
+     * {@link UserRole#ADMIN}. The rule lives in the service because the
      * column itself must stay nullable to serve both roles.
      */
     @ManyToOne(fetch = FetchType.LAZY)

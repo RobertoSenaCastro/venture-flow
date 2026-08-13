@@ -11,6 +11,9 @@ import CreateItemPage from "./features/inventory/pages/CreateItemPage";
 import EditItemPage from "./features/inventory/pages/EditItemPage";
 import TrashItemPage from "./features/inventory/pages/TrashItemPage";
 import CategoryPage from "./features/inventory/pages/CategoryPage";
+
+import { LoginPage } from "./features/auth/pages/LoginPage";
+import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
 import "./App.css";
 
 function App() {
@@ -19,21 +22,99 @@ function App() {
       <Sidebar />
       <div className="app-content">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          {/* The only route reachable without a session. */}
+          <Route path="/login" element={<LoginPage />} />
 
-          <Route path="sales-orders/new" element={<CreateSalesOrderPage />} />
-          <Route path="/sales-orders" element={<OrdersPage />} />
-          <Route path="/sales-orders/:salesOrderId/edit" element={<SalesOrderEditPage />} />
-          <Route path="/sales-orders/trash" element={<SalesOrderTrashPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="/items" element={<ItemsPage />} />
-          <Route path="/items/new" element={<CreateItemPage />} />
-          <Route path="/items/trash" element={<TrashItemPage />} />
-          <Route path="/items/:itemId/edit" element={<EditItemPage />} />
-          <Route path="/categories" element={<CategoryPage />} />
+          {/*
+            Sales orders stay open to both roles for now. Narrowing them to what
+            a supervisor may see is the next phase, and needs the backend filter
+            by assigned supervisor before the pages can rely on it.
+          */}
+          <Route
+            path="/sales-orders"
+            element={
+              <ProtectedRoute>
+                <OrdersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sales-orders/new"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <CreateSalesOrderPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sales-orders/:salesOrderId/edit"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <SalesOrderEditPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sales-orders/trash"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <SalesOrderTrashPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Inventory is factory-side only. */}
+          <Route
+            path="/items"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <ItemsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/items/new"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <CreateItemPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/items/trash"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <TrashItemPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/items/:itemId/edit"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <EditItemPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/categories"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <CategoryPage />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="*" element={<Navigate to="/" replace />} />
-
         </Routes>
       </div>
     </div>

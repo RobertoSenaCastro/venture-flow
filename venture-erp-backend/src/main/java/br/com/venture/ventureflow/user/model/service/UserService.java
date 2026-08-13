@@ -29,7 +29,7 @@ import java.util.Locale;
  * <p>Two rules are enforced here rather than in the database, because both are
  * conditional on {@code role} and a column constraint cannot express them:
  * an assembly supervisor must belong to an active reseller, and a factory
- * employee must not belong to one.
+ * administrator must not belong to one.
  */
 @Service
 public class UserService {
@@ -169,7 +169,7 @@ public class UserService {
 
         if (resellerId != null) {
             throw new InvalidRoleAssignmentException(
-                    "A factory employee must not be linked to a reseller.");
+                    "A factory administrator must not be linked to a reseller.");
         }
 
         return null;

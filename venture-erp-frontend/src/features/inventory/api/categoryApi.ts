@@ -1,14 +1,8 @@
+import { apiFetch } from "../../../shared/api/httpClient";
 import type {
   Category,
   CategoryRequest,
 } from "../types/category";
-
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ?? ""
-).replace(/\/$/, "");
-
-const CATEGORIES_API_URL =
-  `${API_BASE_URL}/api/categories`;
 
 function buildErrorMessage(
   response: Response,
@@ -27,11 +21,10 @@ function buildErrorMessage(
 export async function createCategory(
   categoryData: CategoryRequest,
 ): Promise<Category> {
-  const response = await fetch(CATEGORIES_API_URL, {
+  const response = await apiFetch("/api/categories", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-      Accept: "application/json",
+      "Content-Type": "application/json; charset=UTF-8"
     },
     body: JSON.stringify(categoryData),
   });
@@ -51,12 +44,7 @@ export async function createCategory(
 export async function getCategories(): Promise<
   Category[]
 > {
-  const response = await fetch(CATEGORIES_API_URL, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-    },
-  });
+  const response = await apiFetch("/api/categories", {method: "GET"});
 
   if (!response.ok) {
     throw new Error(
@@ -71,13 +59,12 @@ export async function updateCategory(
   categoryId: number,
   categoryData: CategoryRequest,
 ): Promise<Category> {
-  const response = await fetch(
-    `${CATEGORIES_API_URL}/${categoryId}`,
+  const response = await apiFetch(
+    `/api/categories/${categoryId}`,
     {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json; charset=UTF-8",
-        Accept: "application/json",
+        "Content-Type": "application/json; charset=UTF-8"
       },
       body: JSON.stringify(categoryData),
     },
@@ -98,13 +85,10 @@ export async function updateCategory(
 export async function softDeleteCategory(
   categoryId: number,
 ): Promise<void> {
-  const response = await fetch(
-    `${CATEGORIES_API_URL}/${categoryId}`,
+  const response = await apiFetch(
+    `/api/categories/${categoryId}`,
     {
       method: "DELETE",
-      headers: {
-        Accept: "application/json",
-      },
     },
   );
 
