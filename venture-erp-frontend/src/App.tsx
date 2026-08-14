@@ -11,6 +11,10 @@ import CreateItemPage from "./features/inventory/pages/CreateItemPage";
 import EditItemPage from "./features/inventory/pages/EditItemPage";
 import TrashItemPage from "./features/inventory/pages/TrashItemPage";
 import CategoryPage from "./features/inventory/pages/CategoryPage";
+import ResellerPage from "./features/reseller/pages/ResellerPage";
+import CreateResellerPage from "./features/reseller/pages/CreateResellerPage";
+import EditResellerPage from "./features/reseller/pages/EditResellerPage";
+import TrashResellerPage from "./features/reseller/pages/TrashResellerPage";
 
 import { LoginPage } from "./features/auth/pages/LoginPage";
 import { ProtectedRoute } from "./features/auth/components/ProtectedRoute";
@@ -110,6 +114,39 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <CategoryPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/resellers"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <ResellerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resellers/new"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <CreateResellerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resellers/trash"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <TrashResellerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/resellers/:resellerId/edit"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <EditResellerPage />
               </ProtectedRoute>
             }
           />
