@@ -3,6 +3,11 @@ import "../../inventory/styles/ItemPage.css";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import BackButton from
+  "../../../shared/components/BackButton";
+import ActionMenu from
+  "../../../shared/components/ActionMenu";
+
 import {
   getResellersDetails,
   softDeleteReseller,
@@ -17,7 +22,6 @@ function ResellerPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadErrorMessage, setLoadErrorMessage] = useState("");
   const [deleteErrorMessage, setDeleteErrorMessage] = useState("");
-  const [openMenuResellerId, setOpenMenuResellerId] = useState<number | null>(null);
   const [deletingResellerId, setDeletingResellerId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -60,7 +64,6 @@ function ResellerPage() {
 
     setDeletingResellerId(reseller.id);
     setDeleteErrorMessage("");
-    setOpenMenuResellerId(null);
     try {
       await softDeleteReseller(reseller.id);
       setResellers((current) => current.filter((item) => item.id !== reseller.id));
@@ -77,6 +80,8 @@ function ResellerPage() {
 
   return (
     <main className="page">
+      <BackButton to="/" label="Home" />
+
       <header className="page-header page-header-row">
         <div>
           <p className="eyebrow">Administração</p>
@@ -87,6 +92,20 @@ function ResellerPage() {
         </div>
         <div className="page-header-actions">
           <Link to="/resellers/trash" className="secondary-button trash-link">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M3 6h18" />
+              <path d="M8 6V4h8v2" />
+              <path d="M19 6l-1 14H6L5 6" />
+              <path d="M10 11v5" />
+              <path d="M14 11v5" />
+            </svg>
+            
             Lixeira
           </Link>
           <button
@@ -135,36 +154,23 @@ function ResellerPage() {
               </div>
               <div className="item-card-side">
                 <div className="item-actions">
-                  <button
-                    type="button"
-                    className="item-menu-button"
-                    onClick={() => setOpenMenuResellerId((current) =>
-                      current === reseller.id ? null : reseller.id
-                    )}
-                    aria-label={`Abrir opções de ${reseller.name}`}
-                    aria-expanded={openMenuResellerId === reseller.id}
-                  >
-                    ⋮
-                  </button>
-                  {openMenuResellerId === reseller.id && (
-                    <div className="item-menu">
-                      <button
-                        type="button"
-                        className="item-menu-item"
-                        onClick={() => navigate(`/resellers/${reseller.id}/edit`)}
-                      >
-                        Editar revenda
-                      </button>
-                      <button
-                        type="button"
-                        className="item-menu-item item-menu-item-danger"
-                        onClick={() => void handleSoftDelete(reseller)}
-                        disabled={deletingResellerId === reseller.id}
-                      >
-                        {deletingResellerId === reseller.id ? "Desativando..." : "Desativar"}
-                      </button>
-                    </div>
-                  )}
+                  <ActionMenu
+                    ariaLabel={`Ações da revenda ${reseller.name}`}
+                    items={[
+                      {
+                        label: "Editar",
+                        onClick: () => navigate(`/resellers/${reseller.id}/edit`),
+                      },
+                      {
+                        label: deletingResellerId === reseller.id
+                          ? "Desativando..."
+                          : "Desativar",
+                        variant: "danger",
+                        disabled: deletingResellerId === reseller.id,
+                        onClick: () => void handleSoftDelete(reseller),
+                      },
+                    ]}
+                  />
                 </div>
               </div>
             </article>

@@ -12,6 +12,11 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import BackButton from
+  "../../../shared/components/BackButton";
+import ActionMenu from
+  "../../../shared/components/ActionMenu";
+
 import {
   changeItemQuantity,
   getItems,
@@ -52,9 +57,6 @@ function ItemsPage() {
 
   const [loadErrorMessage, setLoadErrorMessage] =
     useState<string>("");
-
-  const [openMenuItemId, setOpenMenuItemId] =
-    useState<number | null>(null);
 
   const [deletingItemId, setDeletingItemId] =
     useState<number | null>(null);
@@ -180,28 +182,15 @@ function ItemsPage() {
     });
   }, [items, searchTerm]);
 
-  function toggleItemMenu(itemId: number): void {
-    setOpenMenuItemId((currentOpenMenuId) => {
-      if (currentOpenMenuId === itemId) {
-        return null;
-      }
-
-      return itemId;
-    });
-  }
-
   function handleCreateItem(): void {
     navigate("/items/new");
   }
 
   function handleEditItem(itemId: number): void {
-    setOpenMenuItemId(null);
-
     navigate(`/items/${itemId}/edit`);
   }
 
   function openQuantityForm(item: Item): void {
-    setOpenMenuItemId(null);
     setAdjustingItem(item);
     setAdjustmentQuantity(String(item.quantity));
     setAdjustmentReason("");
@@ -299,7 +288,6 @@ function ItemsPage() {
 
     setDeletingItemId(item.id);
     setDeleteErrorMessage("");
-    setOpenMenuItemId(null);
 
     try {
       await softDeleteItem(item.id);
@@ -327,6 +315,8 @@ function ItemsPage() {
 
   return (
     <main className="page">
+      <BackButton to="/" label="Home" />
+
       <header className="page-header page-header-row">
         <div>
           <p className="eyebrow">Inventory</p>
@@ -366,7 +356,7 @@ function ItemsPage() {
               <path d="M14 11v5" />
             </svg>
 
-            Trash
+            Lixeira
           </Link>
 
           <button
@@ -518,66 +508,39 @@ function ItemsPage() {
                   </div>
 
                   <div className="item-actions">
-                    <button
-                      type="button"
-                      className="item-menu-button"
-                      onClick={() => {
-                        toggleItemMenu(item.id);
-                      }}
-                      aria-label={
+                    <ActionMenu
+                      ariaLabel={
                         `Open options for ${item.name}`
                       }
-                      aria-expanded={
-                        openMenuItemId === item.id
-                      }
-                    >
-                      ⋮
-                    </button>
-
-                    {openMenuItemId === item.id && (
-                      <div className="item-menu">
-                        <button
-                          type="button"
-                          className="item-menu-item"
-                          onClick={() => {
+                      items={[
+                        {
+                          label: "Edit item",
+                          onClick: () => {
                             handleEditItem(item.id);
-                          }}
-                        >
-                          Edit item
-                        </button>
-
-                        <button
-                          type="button"
-                          className="item-menu-item"
-                          onClick={() => {
+                          },
+                        },
+                        {
+                          label: "Adjust quantity",
+                          onClick: () => {
                             openQuantityForm(item);
-                          }}
-                        >
-                          Adjust quantity
-                        </button>
-
-                        <button
-                          type="button"
-                          className={
-                            "item-menu-item " +
-                            "item-menu-item-danger"
-                          }
-                          onClick={() => {
+                          },
+                        },
+                        {
+                          label:
+                            deletingItemId === item.id
+                              ? "Removing..."
+                              : "Delete",
+                          variant: "danger",
+                          disabled:
+                            deletingItemId === item.id,
+                          onClick: () => {
                             void handleSoftDeleteItem(
                               item,
                             );
-                          }}
-                          disabled={
-                            deletingItemId ===
-                            item.id
-                          }
-                        >
-                          {deletingItemId === item.id
-                            ? "Removing..."
-                            : "Delete"}
-                        </button>
-                      </div>
-                    )}
+                          },
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
               </article>

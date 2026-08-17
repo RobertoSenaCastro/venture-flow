@@ -10,6 +10,9 @@ import {
   useParams,
 } from "react-router-dom";
 
+import BackButton from
+  "../../../shared/components/BackButton";
+
 import {
   getSalesOrderById,
   updateSalesOrder,
@@ -279,6 +282,11 @@ function SalesOrderEditPage() {
 
   return (
     <main className="page edit-sales-order-page">
+      <BackButton
+        to="/sales-orders"
+        label="Pedidos de venda"
+      />
+
       <header className="edit-sales-order-header">
         <p className="eyebrow">
           Sales orders

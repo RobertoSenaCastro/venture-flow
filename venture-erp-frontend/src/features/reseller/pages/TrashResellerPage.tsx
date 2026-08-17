@@ -1,6 +1,6 @@
 import "../../inventory/styles/ItemPage.css";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import BackButton from "../../../shared/components/BackButton";
 import { getResellersTrash, restoreReseller } from "../api/resellerApi";
 import type { Reseller } from "../types/resellerAdmin";
 import { formatDocument } from "../utils/documentValidation";
@@ -19,7 +19,8 @@ function TrashResellerPage() {
     finally { setRestoringId(null); }
   }
   return <main className="page">
-    <header className="page-header page-header-row"><div><p className="eyebrow">Administração</p><h1>Lixeira de revendas</h1><p className="page-description">Visualize e restaure revendas desativadas.</p></div><Link to="/resellers" className="secondary-button">Voltar para revendas</Link></header>
+    <BackButton to="/resellers" label="Revendas" />
+    <header className="page-header page-header-row"><div><p className="eyebrow">Administração</p><h1>Lixeira de revendas</h1><p className="page-description">Visualize e restaure revendas desativadas.</p></div></header>
     {isLoading && <section className="details-card">Carregando revendas desativadas...</section>}
     {loadErrorMessage && <section className="error-message" role="alert">{loadErrorMessage}</section>}
     {restoreErrorMessage && <section className="error-message" role="alert">{restoreErrorMessage}</section>}

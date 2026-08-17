@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+
+import BackButton from
+  "../../../shared/components/BackButton";
 
 import {
   getSoftDeletedSalesOrders,
@@ -90,6 +92,11 @@ function SalesOrderTrashPage() {
 
   return (
     <main className="page">
+      <BackButton
+        to="/sales-orders"
+        label="Pedidos de venda"
+      />
+
       <header className="page-header page-header-row">
         <div>
           <p className="eyebrow">Sales orders</p>
@@ -101,12 +108,6 @@ function SalesOrderTrashPage() {
           </p>
         </div>
 
-        <Link
-          to="/sales-orders"
-          className="secondary-button"
-        >
-          Back to sales orders
-        </Link>
       </header>
 
       {isLoading && (

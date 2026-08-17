@@ -25,13 +25,13 @@
 }
 
 .secondary-button {
-  border: 1px solid #cbd5e1;
-  color: #334155;
-  background: white;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  background: #eff6ff;
 }
 
-.secondary-button:hover {
-  background: #f8fafc;
+.secondary-button:hover:not(:disabled) {
+  background: #dbeafe;
 }
 
 .primary-button:disabled,

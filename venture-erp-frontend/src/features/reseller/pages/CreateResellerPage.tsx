@@ -3,6 +3,9 @@ import "../../inventory/styles/ItemFormPage.css";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
+import BackButton from
+  "../../../shared/components/BackButton";
+
 import { createReseller } from "../api/resellerApi";
 import ResellerFormFields from "../components/ResellerFormFields";
 import {
@@ -50,6 +53,11 @@ function CreateResellerPage() {
 
   return (
     <main className="page item-form-page">
+      <BackButton
+        to="/resellers"
+        label="Revendas"
+      />
+
       <header className="item-form-header">
         <p className="eyebrow">Administração</p>
         <h1>Nova revenda</h1>

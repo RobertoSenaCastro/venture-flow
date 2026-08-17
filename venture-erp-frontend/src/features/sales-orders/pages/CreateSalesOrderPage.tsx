@@ -1,5 +1,8 @@
 import "../styles/CreateSalesOrderPage.css";
 
+import BackButton from
+    "../../../shared/components/BackButton";
+
 import {
     useEffect,
     useState,
@@ -123,6 +126,11 @@ export function CreateSalesOrderPage() {
 
    return (
     <main className="page create-sales-order-page">
+        <BackButton
+            to="/sales-orders"
+            label="Pedidos de venda"
+        />
+
         <header className="create-sales-order-header">
             <p className="eyebrow">
                 Sales orders

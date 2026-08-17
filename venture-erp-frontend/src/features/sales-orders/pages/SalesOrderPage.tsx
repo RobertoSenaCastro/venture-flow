@@ -10,6 +10,11 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+import BackButton from
+  "../../../shared/components/BackButton";
+import ActionMenu from
+  "../../../shared/components/ActionMenu";
+
 import {
   getSalesOrders,
   softDeleteSalesOrder,
@@ -20,11 +25,6 @@ import type { SalesOrder } from
 
 function SalesOrdersPage() {
   const navigate = useNavigate();
-
-  const [
-    openMenuSalesOrderId,
-    setOpenMenuSalesOrderId,
-  ] = useState<number | null>(null);
 
   const [salesOrders, setSalesOrders] =
     useState<SalesOrder[]>([]);
@@ -76,24 +76,8 @@ function SalesOrdersPage() {
   function handleEditSalesOrder(
     salesOrderId: number,
   ): void {
-    setOpenMenuSalesOrderId(null);
-
     navigate(
       `/sales-orders/${salesOrderId}/edit`,
-    );
-  }
-
-  function toggleSalesOrderMenu(
-    salesOrderId: number,
-  ): void {
-    setOpenMenuSalesOrderId(
-      (currentOpenMenuId) => {
-        if (currentOpenMenuId === salesOrderId) {
-          return null;
-        }
-
-        return salesOrderId;
-      },
     );
   }
 
@@ -110,7 +94,6 @@ function SalesOrdersPage() {
 
     setDeletingSalesOrderId(salesOrder.id);
     setDeleteErrorMessage("");
-    setOpenMenuSalesOrderId(null);
 
     try {
       await softDeleteSalesOrder(salesOrder.id);
@@ -138,6 +121,8 @@ function SalesOrdersPage() {
 
   return (
     <main className="page">
+      <BackButton to="/" label="Home" />
+
       <header className="page-header page-header-row">
         <div>
           <p className="eyebrow">
@@ -254,63 +239,37 @@ function SalesOrdersPage() {
                   </span>
 
                   <div className="sales-order-actions">
-                    <button
-                      type="button"
-                      className="sales-order-menu-button"
-                      onClick={() => {
-                        toggleSalesOrderMenu(
-                          salesOrder.id,
-                        );
-                      }}
-                      aria-label={
+                    <ActionMenu
+                      ariaLabel={
                         `Open options for ${salesOrder.name}`
                       }
-                      aria-expanded={
-                        openMenuSalesOrderId ===
-                        salesOrder.id
-                      }
-                    >
-                      ⋮
-                    </button>
-
-                    {openMenuSalesOrderId ===
-                      salesOrder.id && (
-                      <div className="sales-order-menu">
-                        <button
-                          type="button"
-                          className="sales-order-menu-item"
-                          onClick={() => {
+                      items={[
+                        {
+                          label: "Editar PV",
+                          onClick: () => {
                             handleEditSalesOrder(
                               salesOrder.id,
                             );
-                          }}
-                        >
-                          Editar PV
-                        </button>
-
-                        <button
-                          type="button"
-                          className={
-                            "sales-order-menu-item " +
-                            "sales-order-menu-item-danger"
-                          }
-                          onClick={() => {
+                          },
+                        },
+                        {
+                          label:
+                            deletingSalesOrderId ===
+                            salesOrder.id
+                              ? "Removing..."
+                              : "Deletar",
+                          variant: "danger",
+                          disabled:
+                            deletingSalesOrderId ===
+                            salesOrder.id,
+                          onClick: () => {
                             void handleSoftDeleteSalesOrder(
                               salesOrder,
                             );
-                          }}
-                          disabled={
-                            deletingSalesOrderId ===
-                            salesOrder.id
-                          }
-                        >
-                          {deletingSalesOrderId ===
-                          salesOrder.id
-                            ? "Removing..."
-                            : "Deletar"}
-                        </button>
-                      </div>
-                    )}
+                          },
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
               </article>

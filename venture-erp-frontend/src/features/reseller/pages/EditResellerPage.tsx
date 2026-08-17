@@ -2,6 +2,7 @@ import "../../inventory/styles/ItemFormPage.css";
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import BackButton from "../../../shared/components/BackButton";
 import { getResellerById, updateReseller } from "../api/resellerApi";
 import ResellerFormFields from "../components/ResellerFormFields";
 import { INITIAL_RESELLER_FORM_DATA, type Reseller, type ResellerFormData } from "../types/resellerAdmin";
@@ -61,6 +62,7 @@ function EditResellerPage() {
   }
 
   return <main className="page item-form-page">
+    <BackButton to="/resellers" label="Revendas" />
     <header className="item-form-header"><p className="eyebrow">Administração</p><h1>Editar revenda</h1><p className="page-description">Atualize os dados cadastrais da revenda.</p></header>
     {isLoading && <section className="item-form-card">Carregando revenda...</section>}
     {errorMessage && <section className="item-form-message item-form-error" role="alert">{errorMessage}</section>}

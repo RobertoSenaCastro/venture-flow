@@ -11,6 +11,9 @@ import {
   useParams,
 } from "react-router-dom";
 
+import BackButton from
+  "../../../shared/components/BackButton";
+
 import {
   getItemById,
   updateItem,
@@ -257,6 +260,8 @@ function EditItemPage() {
 
   return (
     <main className="page item-form-page">
+      <BackButton to="/items" label="Estoque" />
+
       <header className="item-form-header">
         <p className="eyebrow">Inventory</p>
 
