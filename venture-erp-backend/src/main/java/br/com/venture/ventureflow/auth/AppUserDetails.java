@@ -1,6 +1,7 @@
 package br.com.venture.ventureflow.auth;
 
 import br.com.venture.ventureflow.user.model.entity.User;
+import br.com.venture.ventureflow.user.model.entity.UserRole;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +22,7 @@ public class AppUserDetails implements UserDetails {
     private final Long userId;
     private final String email;
     private final String passwordHash;
+    private final UserRole role;
     private final Long resellerId;
     private final boolean active;
     private final List<GrantedAuthority> authorities;
@@ -29,6 +31,7 @@ public class AppUserDetails implements UserDetails {
         this.userId = user.getId();
         this.email = user.getEmail();
         this.passwordHash = user.getPasswordHash();
+        this.role = user.getRole();
         this.resellerId = user.getReseller() == null ? null : user.getReseller().getId();
         this.active = user.isActive();
         this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
@@ -40,6 +43,10 @@ public class AppUserDetails implements UserDetails {
 
     public Long getResellerId() {
         return resellerId;
+    }
+
+    public UserRole getRole() {
+        return role;
     }
 
     @Override

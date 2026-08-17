@@ -6,6 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Spring Data persistence boundary for sales orders.
@@ -22,6 +23,10 @@ public interface SalesOrderRepository extends JpaRepository<SalesOrder, Long> {
      * @return active orders in the requested order
      */
     List<SalesOrder> findByActiveTrue(Sort sort);
+
+    List<SalesOrder> findByActiveTrueAndResellerId(Long resellerId, Sort sort);
+
+    List<SalesOrder> findByActiveTrueAndAssemblySupervisorId(Long userId, Sort sort);
     
     /**
      * Finds orders currently in the trash.
@@ -30,4 +35,12 @@ public interface SalesOrderRepository extends JpaRepository<SalesOrder, Long> {
      * @return inactive orders in the requested order
      */
     List<SalesOrder> findByActiveFalse(Sort sort);
+
+    List<SalesOrder> findByActiveFalseAndResellerId(Long resellerId, Sort sort);
+
+    List<SalesOrder> findByActiveFalseAndAssemblySupervisorId(Long userId, Sort sort);
+
+    Optional<SalesOrder> findByIdAndResellerId(Long id, Long resellerId);
+
+    Optional<SalesOrder> findByIdAndAssemblySupervisorId(Long id, Long userId);
 }

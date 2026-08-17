@@ -1,14 +1,20 @@
 package br.com.venture.ventureflow.salesorder.model.service;
 
+import br.com.venture.ventureflow.auth.AppUserDetails;
 import br.com.venture.ventureflow.reseller.model.entity.Reseller;
 import br.com.venture.ventureflow.reseller.model.repository.ResellerRepository;
 import br.com.venture.ventureflow.salesorder.model.dto.SalesOrderRequest;
 import br.com.venture.ventureflow.salesorder.model.dto.SalesOrderResponse;
 import br.com.venture.ventureflow.salesorder.model.entity.SalesOrder;
 import br.com.venture.ventureflow.salesorder.model.repository.SalesOrderRepository;
+import br.com.venture.ventureflow.user.exception.InvalidRoleAssignmentException;
+import br.com.venture.ventureflow.user.model.entity.User;
+import br.com.venture.ventureflow.user.model.entity.UserRole;
+import br.com.venture.ventureflow.user.model.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +31,22 @@ import java.util.Set;
  */
 @Service
 public class SalesOrderService {
+	private static final Sort NEWEST_FIRST = Sort.by(Sort.Direction.DESC, "createdAt")
+			.and(Sort.by(Sort.Direction.DESC, "id"));
 
 	private final SalesOrderRepository salesOrderRepository;
 	private final ResellerRepository resellerRepository;
+	private final UserRepository userRepository;
 
-	public SalesOrderService(SalesOrderRepository salesOrderRepository, ResellerRepository resellerRepository) {
+	public SalesOrderService(
+			SalesOrderRepository salesOrderRepository,
+			ResellerRepository resellerRepository,
+			UserRepository userRepository
+	) {
 
 		this.salesOrderRepository = salesOrderRepository;
 		this.resellerRepository = resellerRepository;
+		this.userRepository = userRepository;
 	}
 
 	/**
@@ -42,7 +56,8 @@ public class SalesOrderService {
 	 * @return the persisted order as an API response
 	 * @throws IllegalArgumentException if the reseller does not exist or is inactive
 	 */
-	public SalesOrderResponse create(SalesOrderRequest request) {
+	public SalesOrderResponse create(SalesOrderRequest request, AppUserDetails principal) {
+		requireWriteAccess(principal);
 		String code = generateNextCode();
 
 		Reseller reseller = resellerRepository.findByIdAndActiveTrue(request.resellerId())
@@ -50,6 +65,9 @@ public class SalesOrderService {
 
 		SalesOrder salesOrder = new SalesOrder(code, request.name(), request.description(), reseller, request.status(),
 				LocalDateTime.now());
+
+		salesOrder.setAssemblySupervisor(
+				resolveAssemblySupervisor(request.assemblySupervisorId(), reseller));
 
 		SalesOrder savedSalesOrder = salesOrderRepository.save(salesOrder);
 		return SalesOrderResponse.from(savedSalesOrder);
@@ -61,10 +79,16 @@ public class SalesOrderService {
 	 *
 	 * @return active order responses
 	 */
-	public List<SalesOrderResponse> findAll() {
-		Sort sort = Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
+	public List<SalesOrderResponse> findAll(AppUserDetails principal) {
+		List<SalesOrder> salesOrders = switch (principal.getRole()) {
+			case ADMIN -> salesOrderRepository.findByActiveTrue(NEWEST_FIRST);
+			case RESELLER_ADMIN -> salesOrderRepository.findByActiveTrueAndResellerId(
+					requireResellerId(principal), NEWEST_FIRST);
+			case ASSEMBLY_SUPERVISOR -> salesOrderRepository
+					.findByActiveTrueAndAssemblySupervisorId(principal.getUserId(), NEWEST_FIRST);
+		};
 
-		return salesOrderRepository.findByActiveTrue(sort).stream().map(SalesOrderResponse::from).toList();
+		return salesOrders.stream().map(SalesOrderResponse::from).toList();
 	}
 
 	/**
@@ -74,8 +98,8 @@ public class SalesOrderService {
 	 * @return matching order response
 	 * @throws EntityNotFoundException if no order has the identifier
 	 */
-	public SalesOrderResponse findById(Long id) {
-		SalesOrder salesOrder = findEntityById(id);
+	public SalesOrderResponse findById(Long id, AppUserDetails principal) {
+		SalesOrder salesOrder = findVisibleEntityById(id, principal);
 		return SalesOrderResponse.from(salesOrder);
 	}
 
@@ -91,9 +115,11 @@ public class SalesOrderService {
 	 */
 	public SalesOrderResponse update(
 		    Long id,
-		    SalesOrderRequest request
+		    SalesOrderRequest request,
+		    AppUserDetails principal
 		) {
-		    SalesOrder salesOrder = findEntityById(id);
+		    requireWriteAccess(principal);
+		    SalesOrder salesOrder = findVisibleEntityById(id, principal);
 
 		    Reseller reseller = resellerRepository
 		        .findByIdAndActiveTrue(request.resellerId())
@@ -103,10 +129,22 @@ public class SalesOrderService {
 		            )
 		        );
 
+		    User assemblySupervisor = salesOrder.getAssemblySupervisor();
+
+		    if (assemblySupervisor != null
+		            && (assemblySupervisor.getReseller() == null
+		                || !assemblySupervisor.getReseller().getId().equals(reseller.getId()))) {
+		        assemblySupervisor = null;
+		    }
+
+		    assemblySupervisor = resolveAssemblySupervisor(
+		            request.assemblySupervisorId(), reseller);
+
 		    salesOrder.setName(request.name());
 		    salesOrder.setDescription(request.description());
 		    salesOrder.setStatus(request.status());
 		    salesOrder.setReseller(reseller);
+		    salesOrder.setAssemblySupervisor(assemblySupervisor);
 
 		    SalesOrder updatedSalesOrder =
 		        salesOrderRepository.save(salesOrder);
@@ -120,8 +158,9 @@ public class SalesOrderService {
 	 * @param id persisted order identifier
 	 * @throws EntityNotFoundException if the order does not exist
 	 */
-	public void softDelete(Long id) {
-		SalesOrder salesOrder = findEntityById(id);
+	public void softDelete(Long id, AppUserDetails principal) {
+		requireWriteAccess(principal);
+		SalesOrder salesOrder = findVisibleEntityById(id, principal);
 		salesOrder.setActive(false);
 		salesOrderRepository.save(salesOrder);
 	}
@@ -132,14 +171,21 @@ public class SalesOrderService {
 	 * @param id persisted order identifier
 	 * @throws EntityNotFoundException if the order does not exist
 	 */
-	public void activate(Long id) {
-		SalesOrder salesOrder = findEntityById(id);
+	public void activate(Long id, AppUserDetails principal) {
+		requireWriteAccess(principal);
+		SalesOrder salesOrder = findVisibleEntityById(id, principal);
 		salesOrder.setActive(true);
 		salesOrderRepository.save(salesOrder);
 	}
 
-	private SalesOrder findEntityById(Long id) {
-		return salesOrderRepository.findById(id)
+	private SalesOrder findVisibleEntityById(Long id, AppUserDetails principal) {
+		return (switch (principal.getRole()) {
+			case ADMIN -> salesOrderRepository.findById(id);
+			case RESELLER_ADMIN -> salesOrderRepository.findByIdAndResellerId(
+					id, requireResellerId(principal));
+			case ASSEMBLY_SUPERVISOR -> salesOrderRepository
+					.findByIdAndAssemblySupervisorId(id, principal.getUserId());
+		})
 				.orElseThrow(() -> new EntityNotFoundException("Sales order not found with ID: " + id));
 	}
 
@@ -168,7 +214,9 @@ public class SalesOrderService {
 	 * @throws EntityNotFoundException if any requested identifier is missing
 	 */
 	@Transactional
-	public void softDeleteMany(Set<Long> ids) {
+	public void softDeleteMany(Set<Long> ids, AppUserDetails principal) {
+		requireWriteAccess(principal);
+
 		if (ids == null || ids.isEmpty()) {
 			throw new IllegalArgumentException("At least one sales order ID is required.");
 		}
@@ -188,9 +236,42 @@ public class SalesOrderService {
 	 *
 	 * @return order responses currently in the trash
 	 */
-	public List<SalesOrderResponse> findAllSoftDeleted() {
-		Sort sort = Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
+	public List<SalesOrderResponse> findAllSoftDeleted(AppUserDetails principal) {
+		List<SalesOrder> salesOrders = switch (principal.getRole()) {
+			case ADMIN -> salesOrderRepository.findByActiveFalse(NEWEST_FIRST);
+			case RESELLER_ADMIN -> salesOrderRepository.findByActiveFalseAndResellerId(
+					requireResellerId(principal), NEWEST_FIRST);
+			case ASSEMBLY_SUPERVISOR -> salesOrderRepository
+					.findByActiveFalseAndAssemblySupervisorId(principal.getUserId(), NEWEST_FIRST);
+		};
 
-		return salesOrderRepository.findByActiveFalse(sort).stream().map(SalesOrderResponse::from).toList();
+		return salesOrders.stream().map(SalesOrderResponse::from).toList();
+	}
+
+	private void requireWriteAccess(AppUserDetails principal) {
+		if (principal.getRole() != UserRole.ADMIN) {
+			throw new AccessDeniedException("Only administrators may modify sales orders.");
+		}
+	}
+
+	private Long requireResellerId(AppUserDetails principal) {
+		if (principal.getResellerId() == null) {
+			throw new AccessDeniedException("The authenticated user is not linked to a reseller.");
+		}
+
+		return principal.getResellerId();
+	}
+
+	private User resolveAssemblySupervisor(Long supervisorId, Reseller reseller) {
+		if (supervisorId == null) {
+			return null;
+		}
+
+		return userRepository.findByIdAndActiveTrueAndRoleAndResellerId(
+				supervisorId,
+				UserRole.ASSEMBLY_SUPERVISOR,
+				reseller.getId()
+		).orElseThrow(() -> new InvalidRoleAssignmentException(
+				"The assembly supervisor must be active and belong to the sales order reseller."));
 	}
 }

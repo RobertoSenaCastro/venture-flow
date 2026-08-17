@@ -37,4 +37,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /** Feeds the supervisor dropdown on the sales-order form. */
     List<User> findByRoleAndResellerIdAndActiveTrue(UserRole role, Long resellerId, Sort sort);
+
+    Optional<User> findByIdAndActiveTrueAndRoleAndResellerId(
+            Long id,
+            UserRole role,
+            Long resellerId
+    );
 }

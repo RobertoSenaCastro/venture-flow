@@ -28,8 +28,8 @@ import java.util.Locale;
  *
  * <p>Two rules are enforced here rather than in the database, because both are
  * conditional on {@code role} and a column constraint cannot express them:
- * an assembly supervisor must belong to an active reseller, and a factory
- * administrator must not belong to one.
+ * reseller administrators and assembly supervisors must belong to an active
+ * reseller, and a factory administrator must not belong to one.
  */
 @Service
 public class UserService {
@@ -157,10 +157,11 @@ public class UserService {
      * Applies the conditional reseller rule and returns the association to set.
      */
     private Reseller resolveReseller(UserRole role, Long resellerId) {
-        if (role == UserRole.ASSEMBLY_SUPERVISOR) {
+        if (role == UserRole.RESELLER_ADMIN
+                || role == UserRole.ASSEMBLY_SUPERVISOR) {
             if (resellerId == null) {
                 throw new InvalidRoleAssignmentException(
-                        "An assembly supervisor must be linked to a reseller.");
+                        "A reseller administrator or assembly supervisor must be linked to a reseller.");
             }
 
             return resellerRepository.findByIdAndActiveTrue(resellerId)

@@ -1,5 +1,6 @@
 package br.com.venture.ventureflow.salesorder.controller;
 
+import br.com.venture.ventureflow.auth.AppUserDetails;
 import br.com.venture.ventureflow.salesorder.model.dto.SalesOrderBulkRequest;
 import br.com.venture.ventureflow.salesorder.model.dto.SalesOrderRequest;
 import br.com.venture.ventureflow.salesorder.model.dto.SalesOrderResponse;
@@ -7,6 +8,7 @@ import br.com.venture.ventureflow.salesorder.model.service.SalesOrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,9 +38,10 @@ public class SalesOrderController {
      */
     @PostMapping
     public ResponseEntity<SalesOrderResponse> create(
-            @Valid @RequestBody SalesOrderRequest request
+            @Valid @RequestBody SalesOrderRequest request,
+            @AuthenticationPrincipal AppUserDetails principal
     ) {
-        SalesOrderResponse response = salesOrderService.create(request);
+        SalesOrderResponse response = salesOrderService.create(request, principal);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -51,8 +54,10 @@ public class SalesOrderController {
      * @return active sales orders
      */
     @GetMapping
-    public ResponseEntity<List<SalesOrderResponse>> findAll() {
-        return ResponseEntity.ok(salesOrderService.findAll());
+    public ResponseEntity<List<SalesOrderResponse>> findAll(
+            @AuthenticationPrincipal AppUserDetails principal
+    ) {
+        return ResponseEntity.ok(salesOrderService.findAll(principal));
     }
 
     /**
@@ -63,9 +68,10 @@ public class SalesOrderController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<SalesOrderResponse> findById(
-            @PathVariable Long id
+            @PathVariable Long id,
+            @AuthenticationPrincipal AppUserDetails principal
     ) {
-        return ResponseEntity.ok(salesOrderService.findById(id));
+        return ResponseEntity.ok(salesOrderService.findById(id, principal));
     }
 
     /**
@@ -79,9 +85,10 @@ public class SalesOrderController {
     @PutMapping("/{id}")
     public ResponseEntity<SalesOrderResponse> update(
             @PathVariable Long id,
-            @Valid @RequestBody SalesOrderRequest request
+            @Valid @RequestBody SalesOrderRequest request,
+            @AuthenticationPrincipal AppUserDetails principal
     ) {
-        return ResponseEntity.ok(salesOrderService.update(id, request));
+        return ResponseEntity.ok(salesOrderService.update(id, request, principal));
     }
 
     /**
@@ -92,9 +99,10 @@ public class SalesOrderController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @PathVariable Long id
+            @PathVariable Long id,
+            @AuthenticationPrincipal AppUserDetails principal
     ) {
-        salesOrderService.softDelete(id);
+        salesOrderService.softDelete(id, principal);
         return ResponseEntity.noContent().build();
     }
 
@@ -106,9 +114,10 @@ public class SalesOrderController {
      */
     @PatchMapping("/{id}/activate")
     public ResponseEntity<Void> activate(
-            @PathVariable Long id
+            @PathVariable Long id,
+            @AuthenticationPrincipal AppUserDetails principal
     ) {
-        salesOrderService.activate(id);
+        salesOrderService.activate(id, principal);
         return ResponseEntity.noContent().build();
     }
     
@@ -120,9 +129,10 @@ public class SalesOrderController {
      */
     @PatchMapping("/bulk-soft-delete")
     public ResponseEntity<Void> softDeleteMany(
-            @RequestBody SalesOrderBulkRequest request
+            @RequestBody SalesOrderBulkRequest request,
+            @AuthenticationPrincipal AppUserDetails principal
     ) {
-        salesOrderService.softDeleteMany(request.ids());
+        salesOrderService.softDeleteMany(request.ids(), principal);
         return ResponseEntity.noContent().build();
     }
     
@@ -132,9 +142,11 @@ public class SalesOrderController {
      * @return soft-deleted orders in newest-first order
      */
     @GetMapping("/trash")
-    public ResponseEntity<List<SalesOrderResponse>> findAllSoftDeleted() {
+    public ResponseEntity<List<SalesOrderResponse>> findAllSoftDeleted(
+            @AuthenticationPrincipal AppUserDetails principal
+    ) {
         List<SalesOrderResponse> salesOrders =
-            salesOrderService.findAllSoftDeleted();
+            salesOrderService.findAllSoftDeleted(principal);
 
         return ResponseEntity.ok(salesOrders);
     }
