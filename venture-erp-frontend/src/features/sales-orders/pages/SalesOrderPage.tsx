@@ -23,6 +23,17 @@ import {
 import type { SalesOrder } from
   "../types/salesOrder";
 
+const STATUS_LABELS: Record<SalesOrder["status"], string> = {
+  CREATED: "Criado",
+  IN_PROGRESS: "Em andamento",
+  COMPLETED: "Concluído",
+  CANCELLED: "Cancelado",
+};
+
+function formatCreatedAt(createdAt: string): string {
+  return new Date(createdAt).toLocaleDateString("pt-BR");
+}
+
 function SalesOrdersPage() {
   const navigate = useNavigate();
 
@@ -214,72 +225,82 @@ function SalesOrdersPage() {
       {!isLoading &&
         !loadErrorMessage &&
         salesOrders.length > 0 && (
-          <section className="sales-orders-list">
-            {salesOrders.map((salesOrder) => (
-              <article
-                className="sales-order-card"
-                key={salesOrder.id}
-              >
-                <div>
-                  <strong>
-                    {salesOrder.code}
-                  </strong>
+          <section className="sales-orders-table-container">
+            <table className="sales-orders-table">
+              <thead>
+                <tr>
+                  <th scope="col">Código</th>
+                  <th scope="col">Nome</th>
+                  <th scope="col">Revenda</th>
+                  <th scope="col" className="sales-order-status-column">
+                    Status
+                  </th>
+                  <th scope="col">Data de criação</th>
+                  <th scope="col" className="sales-orders-actions-heading">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
 
-                  <h2>{salesOrder.name}</h2>
-
-                  <p>
-                    {salesOrder.description ||
-                      "No description"}
-                  </p>
-
-                  {salesOrder.assemblySupervisorName && (
-                    <p>
-                      Supervisor: {salesOrder.assemblySupervisorName}
-                    </p>
-                  )}
-                </div>
-
-                <div className="sales-order-card-side">
-                  <span>
-                    {salesOrder.status}
-                  </span>
-
-                  <div className="sales-order-actions">
-                    <ActionMenu
-                      ariaLabel={
-                        `Open options for ${salesOrder.name}`
-                      }
-                      items={[
-                        {
-                          label: "Editar PV",
-                          onClick: () => {
-                            handleEditSalesOrder(
+              <tbody>
+                {salesOrders.map((salesOrder) => (
+                  <tr key={salesOrder.id}>
+                    <td className="sales-order-code">
+                      {salesOrder.code}
+                    </td>
+                    <td className="sales-order-name">
+                      {salesOrder.name}
+                    </td>
+                    <td>{salesOrder.resellerName}</td>
+                    <td className="sales-order-status-column">
+                      <span
+                        className={
+                          `sales-order-status sales-order-status-${salesOrder.status.toLowerCase()}`
+                        }
+                      >
+                        {STATUS_LABELS[salesOrder.status]}
+                      </span>
+                    </td>
+                    <td className="sales-order-date">
+                      {formatCreatedAt(salesOrder.createdAt)}
+                    </td>
+                    <td className="sales-order-actions">
+                      <ActionMenu
+                        ariaLabel={
+                          `Open options for ${salesOrder.name}`
+                        }
+                        items={[
+                          {
+                            label: "Editar PV",
+                            onClick: () => {
+                              handleEditSalesOrder(
+                                salesOrder.id,
+                              );
+                            },
+                          },
+                          {
+                            label:
+                              deletingSalesOrderId ===
+                              salesOrder.id
+                                ? "Removing..."
+                                : "Deletar",
+                            variant: "danger",
+                            disabled:
+                              deletingSalesOrderId ===
                               salesOrder.id,
-                            );
+                            onClick: () => {
+                              void handleSoftDeleteSalesOrder(
+                                salesOrder,
+                              );
+                            },
                           },
-                        },
-                        {
-                          label:
-                            deletingSalesOrderId ===
-                            salesOrder.id
-                              ? "Removing..."
-                              : "Deletar",
-                          variant: "danger",
-                          disabled:
-                            deletingSalesOrderId ===
-                            salesOrder.id,
-                          onClick: () => {
-                            void handleSoftDeleteSalesOrder(
-                              salesOrder,
-                            );
-                          },
-                        },
-                      ]}
-                    />
-                  </div>
-                </div>
-              </article>
-            ))}
+                        ]}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </section>
         )}
     </main>
