@@ -9,7 +9,8 @@ import {
   type FormEvent,
 } from "react";
 
-import { Link } from "react-router-dom";
+import BackButton from
+  "../../../shared/components/BackButton";
 
 import {
   createCategory,
@@ -237,6 +238,8 @@ function CategoryPage() {
 
   return (
     <main className="page">
+      <BackButton to="/items" label="Estoque" />
+
       <header className="page-header page-header-row">
         <div>
           <p className="eyebrow">Inventory</p>
@@ -250,13 +253,6 @@ function CategoryPage() {
         </div>
 
         <div className="page-header-actions">
-          <Link
-            to="/items"
-            className="secondary-button"
-          >
-            Back to items
-          </Link>
-
           <button
             type="button"
             className="primary-button"

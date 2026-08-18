@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Raised when role and reseller disagree: a supervisor without a reseller,
- * or a factory employee carrying one.
+ * or a factory administrator carrying one.
  */
 @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
 public class InvalidRoleAssignmentException extends RuntimeException {

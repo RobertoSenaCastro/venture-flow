@@ -38,91 +38,97 @@
   color: #657184;
 }
 
-.sales-orders-list {
-  display: grid;
-  gap: 12px;
-}
-
-.sales-order-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 18px;
+.sales-orders-table-container {
   border: 1px solid #e2e7ee;
   border-radius: 12px;
   background: white;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
-.sales-order-card strong {
-  color: #1d4ed8;
-}
-
-.sales-order-card strong {
-  color: #1d4ed8;
-}
-
-/* Right side of the card: status and three-dot menu */
-.sales-order-card-side {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-/* Reference container used to position the dropdown */
-.sales-order-actions {
-  position: relative;
-}
-
-/* Three-dot button */
-.sales-order-menu-button {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border-radius: 8px;
-  color: #475569;
-  background: transparent;
-  cursor: pointer;
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-/* Visual feedback when the mouse is over the button */
-.sales-order-menu-button:hover {
-  color: #1e293b;
-  background: #f1f5f9;
-}
-
-/* Dropdown containing the Edit option */
-.sales-order-menu {
-  position: absolute;
-  top: 44px;
-  right: 0;
-  z-index: 20;
-  min-width: 130px;
-  padding: 6px;
-  border: 1px solid #e2e8f0;
-  border-radius: 9px;
-  background: white;
-  box-shadow: 0 12px 28px rgb(15 23 42 / 16%);
-}
-
-/* Edit button inside the dropdown */
-.sales-order-menu-item {
+.sales-orders-table {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 7px;
-  color: #334155;
-  background: transparent;
-  cursor: pointer;
+  min-width: 850px;
+  border-collapse: collapse;
   text-align: left;
+}
+
+.sales-orders-table th {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dbe2ea;
+  color: #526174;
+  background: #f8fafc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sales-orders-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #edf0f4;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.sales-orders-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.sales-orders-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.sales-orders-table .sales-order-code {
+  color: #1d4ed8;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sales-orders-table .sales-order-name {
+  color: #172033;
   font-weight: 600;
 }
 
-.sales-order-menu-item:hover {
+.sales-order-date {
+  white-space: nowrap;
+}
+
+.sales-order-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.sales-order-status-created {
+  color: #475569;
+  background: #e9eef5;
+}
+
+.sales-order-status-in_progress {
   color: #1d4ed8;
-  background: #eff6ff;
+  background: #dbeafe;
+}
+
+.sales-order-status-completed {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.sales-order-status-cancelled {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.sales-orders-actions-heading,
+.sales-order-actions {
+  width: 72px;
+  text-align: right !important;
 }
 
 .details-card {
@@ -175,20 +181,6 @@
   margin: 0;
 }
 
-.sales-order-menu-item-danger {
-  color: #b91c1c;
-}
-
-.sales-order-menu-item-danger:hover {
-  color: #991b1b;
-  background: #fef2f2;
-}
-
-.sales-order-menu-item:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
 .page-header-actions {
   display: flex;
   align-items: center;
@@ -208,24 +200,24 @@
   flex-shrink: 0;
 }
 
+@media (max-width: 900px) {
+  .sales-orders-table {
+    min-width: 720px;
+  }
+
+  .sales-order-status-column {
+    display: none;
+  }
+}
+
 @media (max-width: 750px) {
   .page-header-row {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .sales-order-card {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
   .details-list div {
     grid-template-columns: 1fr;
     gap: 6px;
-  }
-
-  .sales-order-card-side {
-    width: 100%;
-    justify-content: space-between;
   }
 }

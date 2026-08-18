@@ -8,6 +8,9 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
+import BackButton from
+  "../../../shared/components/BackButton";
+
 import { createItem } from "../api/itemApi";
 import { getCategories } from "../api/categoryApi";
 
@@ -178,6 +181,8 @@ function CreateItemPage() {
 
   return (
     <main className="page item-form-page">
+      <BackButton to="/items" label="Estoque" />
+
       <header className="item-form-header">
         <p className="eyebrow">Inventory</p>
 

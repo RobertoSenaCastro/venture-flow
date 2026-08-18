@@ -1,6 +1,7 @@
 package br.com.venture.ventureflow.salesorder.model.entity;
 
 import br.com.venture.ventureflow.reseller.model.entity.Reseller;
+import br.com.venture.ventureflow.user.model.entity.User;
 
 import jakarta.persistence.*;
 import jakarta.persistence.FetchType;
@@ -54,6 +55,18 @@ public class SalesOrder {
 	    nullable = false
 	)
     private Reseller reseller;
+
+    // No cascade is configured: the supervisor has a lifecycle independent
+    // from the sales order.
+    @ManyToOne(
+	    fetch = FetchType.LAZY,
+	    optional = true
+	)
+	@JoinColumn(
+	    name = "assembly_supervisor_id",
+	    nullable = true
+	)
+    private User assemblySupervisor;
 
     public SalesOrder() {
     }
@@ -130,6 +143,14 @@ public class SalesOrder {
 
 	public void setReseller(Reseller reseller) {
 		this.reseller = reseller;
+	}
+
+	public User getAssemblySupervisor() {
+		return assemblySupervisor;
+	}
+
+	public void setAssemblySupervisor(User assemblySupervisor) {
+		this.assemblySupervisor = assemblySupervisor;
 	}
     
     

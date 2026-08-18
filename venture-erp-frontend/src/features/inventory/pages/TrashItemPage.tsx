@@ -1,7 +1,9 @@
 import "../styles/ItemPage.css";
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+
+import BackButton from
+  "../../../shared/components/BackButton";
 
 import {
   getSoftDeletedItems,
@@ -96,6 +98,8 @@ function TrashItemPage() {
 
   return (
     <main className="page">
+      <BackButton to="/items" label="Estoque" />
+
       <header className="page-header page-header-row">
         <div>
           <p className="eyebrow">Inventory</p>
@@ -108,12 +112,6 @@ function TrashItemPage() {
           </p>
         </div>
 
-        <Link
-          to="/items"
-          className="secondary-button"
-        >
-          Back to items
-        </Link>
       </header>
 
       {isLoading && (

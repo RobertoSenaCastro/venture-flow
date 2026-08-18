@@ -21,6 +21,8 @@ export interface SalesOrder {
   createdAt: string;
   resellerId: number;
   resellerName: string;
+  assemblySupervisorId: number | null;
+  assemblySupervisorName: string | null;
 }
 
 export interface SalesOrderFormData {

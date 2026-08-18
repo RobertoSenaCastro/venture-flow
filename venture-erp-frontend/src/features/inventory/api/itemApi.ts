@@ -1,14 +1,9 @@
+import { apiFetch } from "../../../shared/api/httpClient";
 import type {
   Item,
   ItemRequest,
   QuantityAdjustmentRequest,
 } from "../types/item";
-
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ?? ""
-).replace(/\/$/, "");
-
-const ITEMS_API_URL = `${API_BASE_URL}/api/items`;
 
 /**
  * The backend answers 409 when an internal code or an alias is already
@@ -32,11 +27,10 @@ function buildErrorMessage(
 export async function createItem(
   itemData: ItemRequest,
 ): Promise<Item> {
-  const response = await fetch(ITEMS_API_URL, {
+  const response = await apiFetch("/api/items", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-      Accept: "application/json",
+      "Content-Type": "application/json; charset=UTF-8"
     },
     body: JSON.stringify(itemData),
   });
@@ -61,14 +55,8 @@ export async function getItems(
       ? `?categoryIds=${categoryIds.join(",")}`
       : "";
 
-  const response = await fetch(
-    `${ITEMS_API_URL}${query}`,
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    },
+  const response = await apiFetch(
+    `/api/items${query}`,{method: "GET"},
   );
 
   if (!response.ok) {
@@ -83,8 +71,8 @@ export async function getItems(
 export async function getItemById(
   itemId: number,
 ): Promise<Item> {
-  const response = await fetch(
-    `${ITEMS_API_URL}/${itemId}`,
+  const response = await apiFetch(
+    `/api/items/${itemId}`,
     {
       method: "GET",
       headers: {
@@ -106,8 +94,8 @@ export async function updateItem(
   itemId: number,
   itemData: ItemRequest,
 ): Promise<Item> {
-  const response = await fetch(
-    `${ITEMS_API_URL}/${itemId}`,
+  const response = await apiFetch(
+    `/api/items/${itemId}`,
     {
       method: "PUT",
       headers: {
@@ -135,8 +123,8 @@ export async function changeItemQuantity(
   itemId: number,
   adjustment: QuantityAdjustmentRequest,
 ): Promise<Item> {
-  const response = await fetch(
-    `${ITEMS_API_URL}/${itemId}/quantity`,
+  const response = await apiFetch(
+    `/api/items/${itemId}/quantity`,
     {
       method: "PATCH",
       headers: {
@@ -159,14 +147,9 @@ export async function changeItemQuantity(
 export async function softDeleteItem(
   itemId: number,
 ): Promise<void> {
-  const response = await fetch(
-    `${ITEMS_API_URL}/${itemId}`,
-    {
-      method: "DELETE",
-      headers: {
-        Accept: "application/json",
-      },
-    },
+  const response = await apiFetch(
+    `/api/items/${itemId}`,
+    {method: "DELETE"},
   );
 
   if (!response.ok) {
@@ -179,8 +162,8 @@ export async function softDeleteItem(
 export async function getSoftDeletedItems(): Promise<
   Item[]
 > {
-  const response = await fetch(
-    `${ITEMS_API_URL}/trash`,
+  const response = await apiFetch(
+    "/api/items/trash",
     {
       method: "GET",
       headers: {
@@ -201,8 +184,8 @@ export async function getSoftDeletedItems(): Promise<
 export async function restoreItem(
   itemId: number,
 ): Promise<void> {
-  const response = await fetch(
-    `${ITEMS_API_URL}/${itemId}/activate`,
+  const response = await apiFetch(
+    `/api/items/${itemId}/activate`,
     {
       method: "PATCH",
       headers: {

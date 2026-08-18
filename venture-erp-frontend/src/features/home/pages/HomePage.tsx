@@ -13,7 +13,7 @@ function HomePage() {
       </header>
 
       <section className="module-grid">
-        <Link to="/orders" className="module-card">
+        <Link to="/sales-orders" className="module-card">
           <div className="module-icon">▤</div>
           <div>
             <h2>Pedidos de venda</h2>

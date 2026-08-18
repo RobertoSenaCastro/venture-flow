@@ -1,24 +1,37 @@
+import { apiFetch } from "../../../shared/api/httpClient";
 import type {
   CreateSalesOrderRequest,
   SalesOrder,
   UpdateSalesOrderRequest,
 } from "../types/salesOrder";
 
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ?? ""
-).replace(/\/$/, "");
+export interface AssemblySupervisorOption {
+  id: number;
+  name: string;
+}
 
-const SALES_ORDERS_API_URL =
-  `${API_BASE_URL}/api/sales-orders`;
+export interface SalesOrderWithAssemblySupervisor extends SalesOrder {
+  assemblySupervisorId: number | null;
+  assemblySupervisorName: string | null;
+}
+
+type CreateSalesOrderWithAssemblySupervisorRequest =
+  CreateSalesOrderRequest & {
+    assemblySupervisorId: number | null;
+  };
+
+type UpdateSalesOrderWithAssemblySupervisorRequest =
+  UpdateSalesOrderRequest & {
+    assemblySupervisorId: number | null;
+  };
 
 export async function createSalesOrder(
-  salesOrderData: CreateSalesOrderRequest,
+  salesOrderData: CreateSalesOrderWithAssemblySupervisorRequest,
 ): Promise<SalesOrder> {
-  const response = await fetch(SALES_ORDERS_API_URL, {
+  const response = await apiFetch("/api/sales-orders", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-      Accept: "application/json",
+      "Content-Type": "application/json; charset=UTF-8"
     },
     body: JSON.stringify(salesOrderData),
   });
@@ -33,12 +46,7 @@ export async function createSalesOrder(
 }
 
 export async function getSalesOrders(): Promise<SalesOrder[]> {
-  const response = await fetch(SALES_ORDERS_API_URL, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-    },
-  });
+  const response = await apiFetch("/api/sales-orders", {method: "GET",});
 
   if (!response.ok) {
     throw new Error(
@@ -51,15 +59,9 @@ export async function getSalesOrders(): Promise<SalesOrder[]> {
 
 export async function getSalesOrderById(
   salesOrderId: number,
-): Promise<SalesOrder> {
-  const response = await fetch(
-    `${SALES_ORDERS_API_URL}/${salesOrderId}`,
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    },
+): Promise<SalesOrderWithAssemblySupervisor> {
+  const response = await apiFetch(
+    `/api/sales-orders/${salesOrderId}`,{method: "GET"},
   );
 
   if (!response.ok) {
@@ -68,20 +70,36 @@ export async function getSalesOrderById(
     );
   }
 
-  return response.json() as Promise<SalesOrder>;
+  return response.json() as Promise<SalesOrderWithAssemblySupervisor>;
+}
+
+export async function getAssemblySupervisorsByReseller(
+  resellerId: number,
+): Promise<AssemblySupervisorOption[]> {
+  const response = await apiFetch(
+    `/api/users/supervisors?resellerId=${encodeURIComponent(resellerId)}`,
+    { method: "GET" },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not load assembly supervisors. HTTP ${response.status}`,
+    );
+  }
+
+  return response.json() as Promise<AssemblySupervisorOption[]>;
 }
 
 export async function updateSalesOrder(
   salesOrderId: number,
-  salesOrderData: UpdateSalesOrderRequest,
-): Promise<SalesOrder> {
-  const response = await fetch(
-    `${SALES_ORDERS_API_URL}/${salesOrderId}`,
+  salesOrderData: UpdateSalesOrderWithAssemblySupervisorRequest,
+): Promise<SalesOrderWithAssemblySupervisor> {
+  const response = await apiFetch(
+    `/api/sales-orders/${salesOrderId}`,
     {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json; charset=UTF-8",
-        Accept: "application/json",
+        "Content-Type": "application/json; charset=UTF-8"
       },
       body: JSON.stringify(salesOrderData),
     },
@@ -93,20 +111,14 @@ export async function updateSalesOrder(
     );
   }
 
-  return response.json() as Promise<SalesOrder>;
+  return response.json() as Promise<SalesOrderWithAssemblySupervisor>;
 }
 
 export async function softDeleteSalesOrder(
   salesOrderId: number,
 ): Promise<void> {
-  const response = await fetch(
-    `${SALES_ORDERS_API_URL}/${salesOrderId}`,
-    {
-      method: "DELETE",
-      headers: {
-        Accept: "application/json",
-      },
-    },
+  const response = await apiFetch(
+    `/api/sales-orders/${salesOrderId}`, {method: "DELETE",},
   );
 
   if (!response.ok) {
@@ -118,14 +130,8 @@ export async function softDeleteSalesOrder(
 
 export async function getSoftDeletedSalesOrders():
 Promise<SalesOrder[]> {
-  const response = await fetch(
-    `${SALES_ORDERS_API_URL}/trash`,
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    },
+  const response = await apiFetch(
+    "/api/sales-orders/trash",{method: "GET",},
   );
 
   if (!response.ok) {
@@ -140,14 +146,9 @@ Promise<SalesOrder[]> {
 export async function restoreSalesOrder(
   salesOrderId: number,
 ): Promise<void> {
-  const response = await fetch(
-    `${SALES_ORDERS_API_URL}/${salesOrderId}/activate`,
-    {
-      method: "PATCH",
-      headers: {
-        Accept: "application/json",
-      },
-    },
+  const response = await apiFetch(
+    `/api/sales-orders/${salesOrderId}/activate`,
+    {method: "PATCH",},
   );
 
   if (!response.ok) {

@@ -1,6 +1,16 @@
 package br.com.venture.ventureflow.reseller.model.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.time.LocalDateTime;
 
@@ -50,8 +60,11 @@ public class Reseller {
     @Column(nullable = false)
     private boolean active = true;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     protected Reseller() {
     }
@@ -59,14 +72,23 @@ public class Reseller {
     public Reseller(
         String name,
         DocumentType documentType,
-        String documentNumber,
-        LocalDateTime createdAt
+        String documentNumber
     ) {
         this.name = name;
         this.documentType = documentType;
         this.documentNumber = documentNumber;
-        this.createdAt = createdAt;
         this.active = true;
+    }
+
+    @PrePersist
+    void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -111,5 +133,9 @@ public class Reseller {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

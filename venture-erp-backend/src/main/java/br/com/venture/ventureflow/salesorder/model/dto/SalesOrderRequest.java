@@ -16,6 +16,7 @@ import jakarta.validation.constraints.Size;
  * @param description optional description, limited to 500 characters
  * @param status persisted lifecycle status supplied by the caller
  * @param resellerId identifier of the reseller associated with the order
+ * @param assemblySupervisorId optional assembly supervisor identifier
  */
 public record SalesOrderRequest(
 
@@ -31,6 +32,9 @@ public record SalesOrderRequest(
 
         @NotNull(message = "The reseller is required")
         @Positive(message = "The reseller ID must be greater than zero")
-        Long resellerId
+        Long resellerId,
+
+        @Positive(message = "The assembly supervisor ID must be greater than zero")
+        Long assemblySupervisorId
 ) {
 }

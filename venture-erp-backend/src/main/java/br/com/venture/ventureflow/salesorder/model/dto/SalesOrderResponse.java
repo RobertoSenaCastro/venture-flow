@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
  * @param createdAt creation timestamp assigned by the service
  * @param resellerId associated reseller identifier
  * @param resellerName associated reseller name
+ * @param assemblySupervisorId assigned supervisor identifier, when present
+ * @param assemblySupervisorName assigned supervisor name, when present
  */
 public record SalesOrderResponse(
 	    Long id,
@@ -30,7 +32,9 @@ public record SalesOrderResponse(
 	    boolean active,
 	    LocalDateTime createdAt,
 	    Long resellerId,
-	    String resellerName
+	    String resellerName,
+	    Long assemblySupervisorId,
+	    String assemblySupervisorName
 	) {
 
 	    /**
@@ -52,7 +56,13 @@ public record SalesOrderResponse(
 	            salesOrder.isActive(),
 	            salesOrder.getCreatedAt(),
 	            salesOrder.getReseller().getId(),
-	            salesOrder.getReseller().getName()
+	            salesOrder.getReseller().getName(),
+	            salesOrder.getAssemblySupervisor() == null
+	                ? null
+	                : salesOrder.getAssemblySupervisor().getId(),
+	            salesOrder.getAssemblySupervisor() == null
+	                ? null
+	                : salesOrder.getAssemblySupervisor().getName()
 	        );
 	    }
 	}

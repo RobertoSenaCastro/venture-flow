@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
@@ -10,9 +11,18 @@ import {
   useParams,
 } from "react-router-dom";
 
+import BackButton from
+  "../../../shared/components/BackButton";
+
 import {
+  getAssemblySupervisorsByReseller,
   getSalesOrderById,
   updateSalesOrder,
+} from "../api/salesOrderApi";
+
+import type {
+  AssemblySupervisorOption,
+  SalesOrderWithAssemblySupervisor,
 } from "../api/salesOrderApi";
 
 import { getActiveResellers } from
@@ -22,7 +32,6 @@ import type { ResellerOption } from
   "../../reseller/types/reseller";
 
 import type {
-  SalesOrder,
   SalesOrderStatus,
 } from "../types/salesOrder";
 
@@ -36,6 +45,7 @@ interface SalesOrderEditFormData {
   // Select elements store their values as strings.
   // The value is converted to a number before calling the backend.
   resellerId: string;
+  assemblySupervisorId: string;
 }
 
 const INITIAL_FORM_DATA: SalesOrderEditFormData = {
@@ -43,20 +53,31 @@ const INITIAL_FORM_DATA: SalesOrderEditFormData = {
   description: "",
   status: "CREATED",
   resellerId: "",
+  assemblySupervisorId: "",
 };
 
 function SalesOrderEditPage() {
   const navigate = useNavigate();
+  const assemblySupervisorsRequestId = useRef(0);
 
   const { salesOrderId } = useParams<{
     salesOrderId: string;
   }>();
 
   const [salesOrder, setSalesOrder] =
-    useState<SalesOrder | null>(null);
+    useState<SalesOrderWithAssemblySupervisor | null>(null);
 
   const [resellers, setResellers] =
     useState<ResellerOption[]>([]);
+
+  const [assemblySupervisors, setAssemblySupervisors] =
+    useState<AssemblySupervisorOption[]>([]);
+
+  const [isLoadingAssemblySupervisors, setIsLoadingAssemblySupervisors] =
+    useState(false);
+
+  const [assemblySupervisorsError, setAssemblySupervisorsError] =
+    useState("");
 
   const [formData, setFormData] =
     useState<SalesOrderEditFormData>(
@@ -126,8 +147,18 @@ function SalesOrderEditPage() {
           return;
         }
 
+        const loadedAssemblySupervisors =
+          await getAssemblySupervisorsByReseller(
+            loadedSalesOrder.resellerId,
+          );
+
+        if (isCancelled) {
+          return;
+        }
+
         setSalesOrder(loadedSalesOrder);
         setResellers(activeResellers);
+        setAssemblySupervisors(loadedAssemblySupervisors);
 
         setFormData({
           name: loadedSalesOrder.name,
@@ -137,6 +168,10 @@ function SalesOrderEditPage() {
           resellerId: String(
             loadedSalesOrder.resellerId,
           ),
+          assemblySupervisorId:
+            loadedSalesOrder.assemblySupervisorId === null
+              ? ""
+              : String(loadedSalesOrder.assemblySupervisorId),
         });
       } catch (error: unknown) {
         if (isCancelled) {
@@ -163,6 +198,47 @@ function SalesOrderEditPage() {
       isCancelled = true;
     };
   }, [salesOrderId]);
+
+  async function handleResellerChange(
+    event: ChangeEvent<HTMLSelectElement>,
+  ): Promise<void> {
+    const resellerId = event.target.value;
+    const requestId = ++assemblySupervisorsRequestId.current;
+
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      resellerId,
+      assemblySupervisorId: "",
+    }));
+    setAssemblySupervisors([]);
+    setAssemblySupervisorsError("");
+
+    if (!resellerId) {
+      setIsLoadingAssemblySupervisors(false);
+      return;
+    }
+
+    try {
+      setIsLoadingAssemblySupervisors(true);
+      const loadedSupervisors =
+        await getAssemblySupervisorsByReseller(Number(resellerId));
+      if (requestId === assemblySupervisorsRequestId.current) {
+        setAssemblySupervisors(loadedSupervisors);
+      }
+    } catch (error: unknown) {
+      if (requestId === assemblySupervisorsRequestId.current) {
+        setAssemblySupervisorsError(
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred while loading assembly supervisors.",
+        );
+      }
+    } finally {
+      if (requestId === assemblySupervisorsRequestId.current) {
+        setIsLoadingAssemblySupervisors(false);
+      }
+    }
+  }
 
   function handleInputChange(
     event: ChangeEvent<
@@ -244,6 +320,9 @@ function SalesOrderEditPage() {
 
             // The backend expects a numeric reseller identifier.
             resellerId: Number(formData.resellerId),
+            assemblySupervisorId: formData.assemblySupervisorId
+              ? Number(formData.assemblySupervisorId)
+              : null,
           },
         );
 
@@ -257,6 +336,10 @@ function SalesOrderEditPage() {
         resellerId: String(
           updatedSalesOrder.resellerId,
         ),
+        assemblySupervisorId:
+          updatedSalesOrder.assemblySupervisorId === null
+            ? ""
+            : String(updatedSalesOrder.assemblySupervisorId),
       });
 
       setSuccessMessage(
@@ -279,6 +362,11 @@ function SalesOrderEditPage() {
 
   return (
     <main className="page edit-sales-order-page">
+      <BackButton
+        to="/sales-orders"
+        label="Pedidos de venda"
+      />
+
       <header className="edit-sales-order-header">
         <p className="eyebrow">
           Sales orders
@@ -374,7 +462,7 @@ function SalesOrderEditPage() {
                 id="resellerId"
                 name="resellerId"
                 value={formData.resellerId}
-                onChange={handleInputChange}
+                onChange={(event) => void handleResellerChange(event)}
                 disabled={isSubmitting}
                 required
               >
@@ -391,6 +479,45 @@ function SalesOrderEditPage() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="edit-sales-order-field">
+              <label htmlFor="assemblySupervisorId">
+                Supervisor de montagem
+              </label>
+
+              <select
+                id="assemblySupervisorId"
+                name="assemblySupervisorId"
+                value={formData.assemblySupervisorId}
+                onChange={handleInputChange}
+                disabled={
+                  isSubmitting ||
+                  isLoadingAssemblySupervisors ||
+                  !formData.resellerId
+                }
+              >
+                <option value="">
+                  {isLoadingAssemblySupervisors
+                    ? "Carregando supervisores..."
+                    : "Sem supervisor"}
+                </option>
+
+                {assemblySupervisors.map((supervisor) => (
+                  <option key={supervisor.id} value={supervisor.id}>
+                    {supervisor.name}
+                  </option>
+                ))}
+              </select>
+
+              {assemblySupervisorsError && (
+                <div
+                  className="edit-sales-order-message edit-sales-order-error"
+                  role="alert"
+                >
+                  {assemblySupervisorsError}
+                </div>
+              )}
             </div>
 
             <div className="edit-sales-order-field">
