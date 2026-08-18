@@ -5,6 +5,21 @@ import type {
   UpdateSalesOrderRequest,
 } from "../types/salesOrder";
 
+export interface AssemblySupervisorOption {
+  id: number;
+  name: string;
+}
+
+export interface SalesOrderWithAssemblySupervisor extends SalesOrder {
+  assemblySupervisorId: number | null;
+  assemblySupervisorName: string | null;
+}
+
+type UpdateSalesOrderWithAssemblySupervisorRequest =
+  UpdateSalesOrderRequest & {
+    assemblySupervisorId: number | null;
+  };
+
 export async function createSalesOrder(
   salesOrderData: CreateSalesOrderRequest,
 ): Promise<SalesOrder> {
@@ -39,7 +54,7 @@ export async function getSalesOrders(): Promise<SalesOrder[]> {
 
 export async function getSalesOrderById(
   salesOrderId: number,
-): Promise<SalesOrder> {
+): Promise<SalesOrderWithAssemblySupervisor> {
   const response = await apiFetch(
     `/api/sales-orders/${salesOrderId}`,{method: "GET"},
   );
@@ -50,13 +65,30 @@ export async function getSalesOrderById(
     );
   }
 
-  return response.json() as Promise<SalesOrder>;
+  return response.json() as Promise<SalesOrderWithAssemblySupervisor>;
+}
+
+export async function getAssemblySupervisorsByReseller(
+  resellerId: number,
+): Promise<AssemblySupervisorOption[]> {
+  const response = await apiFetch(
+    `/api/users/supervisors?resellerId=${encodeURIComponent(resellerId)}`,
+    { method: "GET" },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Could not load assembly supervisors. HTTP ${response.status}`,
+    );
+  }
+
+  return response.json() as Promise<AssemblySupervisorOption[]>;
 }
 
 export async function updateSalesOrder(
   salesOrderId: number,
-  salesOrderData: UpdateSalesOrderRequest,
-): Promise<SalesOrder> {
+  salesOrderData: UpdateSalesOrderWithAssemblySupervisorRequest,
+): Promise<SalesOrderWithAssemblySupervisor> {
   const response = await apiFetch(
     `/api/sales-orders/${salesOrderId}`,
     {
@@ -74,7 +106,7 @@ export async function updateSalesOrder(
     );
   }
 
-  return response.json() as Promise<SalesOrder>;
+  return response.json() as Promise<SalesOrderWithAssemblySupervisor>;
 }
 
 export async function softDeleteSalesOrder(
