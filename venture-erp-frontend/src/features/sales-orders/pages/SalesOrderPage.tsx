@@ -231,6 +231,12 @@ function SalesOrdersPage() {
                     {salesOrder.description ||
                       "No description"}
                   </p>
+
+                  {salesOrder.assemblySupervisorName && (
+                    <p>
+                      Supervisor: {salesOrder.assemblySupervisorName}
+                    </p>
+                  )}
                 </div>
 
                 <div className="sales-order-card-side">
