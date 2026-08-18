@@ -15,13 +15,18 @@ export interface SalesOrderWithAssemblySupervisor extends SalesOrder {
   assemblySupervisorName: string | null;
 }
 
+type CreateSalesOrderWithAssemblySupervisorRequest =
+  CreateSalesOrderRequest & {
+    assemblySupervisorId: number | null;
+  };
+
 type UpdateSalesOrderWithAssemblySupervisorRequest =
   UpdateSalesOrderRequest & {
     assemblySupervisorId: number | null;
   };
 
 export async function createSalesOrder(
-  salesOrderData: CreateSalesOrderRequest,
+  salesOrderData: CreateSalesOrderWithAssemblySupervisorRequest,
 ): Promise<SalesOrder> {
   const response = await apiFetch("/api/sales-orders", {
     method: "POST",

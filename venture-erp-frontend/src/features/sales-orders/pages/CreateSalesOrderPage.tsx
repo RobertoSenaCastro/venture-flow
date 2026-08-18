@@ -5,7 +5,9 @@ import BackButton from
 
 import {
     useEffect,
+    useRef,
     useState,
+    type ChangeEvent,
     type FormEvent,
 } from "react";
 
@@ -17,10 +19,17 @@ import type { ResellerOption } from
 
 import { useNavigate } from "react-router-dom";
 
-import { createSalesOrder } from
+import {
+    createSalesOrder,
+    getAssemblySupervisorsByReseller,
+} from "../api/salesOrderApi";
+
+import type { AssemblySupervisorOption } from
     "../api/salesOrderApi";
 
 export function CreateSalesOrderPage() {
+
+    const assemblySupervisorsRequestId = useRef(0);
 
     const [name, setName] = useState("");
 
@@ -41,6 +50,18 @@ export function CreateSalesOrderPage() {
     // HTML select values are strings, so the ID will be converted
     // to a number only when the form is submitted.
     const [selectedResellerId, setSelectedResellerId] =
+        useState("");
+
+    const [selectedAssemblySupervisorId, setSelectedAssemblySupervisorId] =
+        useState("");
+
+    const [assemblySupervisors, setAssemblySupervisors] =
+        useState<AssemblySupervisorOption[]>([]);
+
+    const [isLoadingAssemblySupervisors, setIsLoadingAssemblySupervisors] =
+        useState(false);
+
+    const [assemblySupervisorsError, setAssemblySupervisorsError] =
         useState("");
 
     const [isLoadingResellers, setIsLoadingResellers] =
@@ -70,6 +91,45 @@ export function CreateSalesOrderPage() {
 
         void loadResellers();
     }, []);
+
+    async function handleResellerChange(
+        event: ChangeEvent<HTMLSelectElement>,
+    ): Promise<void> {
+        const resellerId = event.target.value;
+        const requestId = ++assemblySupervisorsRequestId.current;
+
+        setSelectedResellerId(resellerId);
+        setSelectedAssemblySupervisorId("");
+        setAssemblySupervisors([]);
+        setAssemblySupervisorsError("");
+
+        if (!resellerId) {
+            setIsLoadingAssemblySupervisors(false);
+            return;
+        }
+
+        try {
+            setIsLoadingAssemblySupervisors(true);
+            const loadedSupervisors =
+                await getAssemblySupervisorsByReseller(Number(resellerId));
+
+            if (requestId === assemblySupervisorsRequestId.current) {
+                setAssemblySupervisors(loadedSupervisors);
+            }
+        } catch (error: unknown) {
+            if (requestId === assemblySupervisorsRequestId.current) {
+                setAssemblySupervisorsError(
+                    error instanceof Error
+                        ? error.message
+                        : "An unexpected error occurred while loading assembly supervisors.",
+                );
+            }
+        } finally {
+            if (requestId === assemblySupervisorsRequestId.current) {
+                setIsLoadingAssemblySupervisors(false);
+            }
+        }
+    }
 
     async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -107,6 +167,10 @@ export function CreateSalesOrderPage() {
 
             // HTML select values are strings, but the backend expects a number.
             resellerId: Number(selectedResellerId),
+
+            assemblySupervisorId: selectedAssemblySupervisorId
+                ? Number(selectedAssemblySupervisorId)
+                : null,
         });
 
         // Return to the list only after the backend confirms the creation.
@@ -194,11 +258,7 @@ export function CreateSalesOrderPage() {
                         id="reseller"
                         name="reseller"
                         value={selectedResellerId}
-                        onChange={(event) => {
-                            setSelectedResellerId(
-                                event.target.value,
-                            );
-                        }}
+                        onChange={(event) => void handleResellerChange(event)}
                         disabled={
                             isLoadingResellers ||
                             isSubmitting ||
@@ -223,6 +283,50 @@ export function CreateSalesOrderPage() {
                         ))}
                     </select>
                 </div>
+
+                <div className="create-sales-order-field">
+                    <label htmlFor="assemblySupervisorId">
+                        Supervisor de montagem
+                    </label>
+
+                    <select
+                        id="assemblySupervisorId"
+                        name="assemblySupervisorId"
+                        value={selectedAssemblySupervisorId}
+                        onChange={(event) => {
+                            setSelectedAssemblySupervisorId(event.target.value);
+                        }}
+                        disabled={
+                            isSubmitting ||
+                            isLoadingAssemblySupervisors ||
+                            !selectedResellerId
+                        }
+                    >
+                        <option value="">
+                            {isLoadingAssemblySupervisors
+                                ? "Carregando supervisores..."
+                                : "Sem supervisor"}
+                        </option>
+
+                        {assemblySupervisors.map((supervisor) => (
+                            <option
+                                key={supervisor.id}
+                                value={supervisor.id}
+                            >
+                                {supervisor.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {assemblySupervisorsError && (
+                    <div
+                        className="create-sales-order-error"
+                        role="alert"
+                    >
+                        {assemblySupervisorsError}
+                    </div>
+                )}
 
                 {resellerLoadError && (
                     <div
