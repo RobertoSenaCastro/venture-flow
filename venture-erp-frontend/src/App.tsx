@@ -38,15 +38,11 @@ function App() {
             }
           />
 
-          {/*
-            Sales orders stay open to both roles for now. Narrowing them to what
-            a supervisor may see is the next phase, and needs the backend filter
-            by assigned supervisor before the pages can rely on it.
-          */}
+          {/* Sales-order administration is factory-side only. */}
           <Route
             path="/sales-orders"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <OrdersPage />
               </ProtectedRoute>
             }

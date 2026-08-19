@@ -1,4 +1,4 @@
-export type UserRole = "ADMIN" | "ASSEMBLY_SUPERVISOR";
+export type UserRole = "ADMIN" | "RESELLER_ADMIN" | "ASSEMBLY_SUPERVISOR";
 
 /**
  * The signed-in user as the interface needs it.

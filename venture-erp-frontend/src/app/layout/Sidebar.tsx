@@ -1,7 +1,14 @@
 import { NavLink, type NavLinkRenderProps } from "react-router-dom";
 import { useAuth } from "../../features/auth/AuthContext";
+import type { UserRole } from "../../features/auth/types/auth";
 import { getNavigationItems } from "./navigationItems";
 import "./Sidebar.css";
+
+const ROLE_LABELS: Record<UserRole, string> = {
+  ADMIN: "Administrador",
+  ASSEMBLY_SUPERVISOR: "Supervisor de montagem",
+  RESELLER_ADMIN: "Administrador de revenda",
+};
 
 function getLinkClass({ isActive }: NavLinkRenderProps): string {
   return isActive ? "sidebar-link active" : "sidebar-link";
@@ -43,9 +50,7 @@ function Sidebar() {
       <div className="sidebar-user">
         <div className="sidebar-user-info">
           <strong>{user.name}</strong>
-          <span>
-            {user.role === "ADMIN" ? "Administrador" : "Supervisor de montagem"}
-          </span>
+          <span>{ROLE_LABELS[user.role]}</span>
         </div>
         <button type="button" className="sidebar-signout" onClick={signOut}>
           Sair
