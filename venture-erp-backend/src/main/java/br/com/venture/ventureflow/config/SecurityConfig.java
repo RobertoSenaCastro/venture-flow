@@ -23,9 +23,9 @@ import java.util.List;
 /**
  * Declares who may reach which route.
  *
- * <p>Every endpoint is now explicit. Nothing is open by omission: any route not
- * listed below requires a valid token, which is the point of the change but
- * also means a new controller is unreachable until it is accounted for here.
+ * <p>Any route not listed below is restricted to administrators by default.
+ * Granting another role access requires an explicit carve-out placed before
+ * the final {@code anyRequest} rule.
  *
  * <p>CORS is defined as a bean rather than through {@code addCorsMappings},
  * because MVC-level CORS runs after the security filter chain and would let
@@ -55,10 +55,10 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/me").authenticated()
+                        .anyRequest().hasRole("ADMIN"))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint((request, response, exception) ->

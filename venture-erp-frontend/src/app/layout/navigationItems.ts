@@ -23,7 +23,6 @@ const NAVIGATION_BY_ROLE: Record<UserRole, NavigationItem[]> = {
   ],
   ASSEMBLY_SUPERVISOR: [
     { label: "Home", to: "/", icon: "⌂", end: true },
-    { label: "Pedidos de venda", to: "/sales-orders", icon: "▤" },
   ],
 };
 
