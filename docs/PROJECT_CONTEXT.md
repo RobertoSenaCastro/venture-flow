@@ -80,10 +80,27 @@ Runtime authentication settings are `JWT_SECRET` (required, at least 32 characte
 | Role | Account invariant | Sales-order visibility | Sales-order writes | Frontend navigation |
 |---|---|---|---|---|
 | `ADMIN` | Must not reference a reseller | All orders | Create, update, soft-delete, bulk soft-delete, restore | Home, sales orders, inventory, resellers |
-| `RESELLER_ADMIN` | Must reference an active reseller | Orders belonging to the token's reseller | None | **Gap:** absent from the frontend `UserRole` union and navigation map; the unqualified authenticated list route is still reachable at runtime |
-| `ASSEMBLY_SUPERVISOR` | Must reference an active reseller | Orders assigned to the authenticated user's ID | None | Home and sales orders |
+| `RESELLER_ADMIN` | Must reference an active reseller | Orders belonging to the token's reseller once its API carve-out ships | None | **Gap:** absent from the frontend `UserRole` union and navigation map |
+| `ASSEMBLY_SUPERVISOR` | Must reference an active reseller | Orders assigned to the authenticated user's ID once its API carve-out ships | None | Home |
 
 User role/reseller invariants are enforced in `UserService`, not by a database check that can express the conditional association. Email is normalized to lowercase and unique; passwords are stored only as BCrypt hashes. User endpoints under `/api/users/**` are restricted to `ADMIN` by `SecurityConfig`.
+
+### Authorization policy (fail-closed)
+
+Authorization is deliberately fail-closed. `SecurityConfig` ends with `anyRequest().hasRole("ADMIN")`, so every route not listed explicitly requires `ADMIN`. A newly introduced role therefore receives no access until the product grants it deliberately; changing the fallback back to `authenticated()` would reopen application APIs merely because a caller can sign in.
+
+The current application carve-outs are `/api/auth/login`, which is public, and `/api/auth/me`, which accepts any authenticated user. The latter is required for session restoration on browser reload; without it, a non-admin with a valid token would receive an authorization failure and be signed out when the application rebuilds its auth context.
+
+Access for a non-admin role is coupled to its consumer: the carve-out and the page that uses it ship in the same commit, with the carve-out positioned above `anyRequest`. Opening an API earlier would expose surface for which the application has no legitimate consumer yet.
+
+Frontend pages are separated by capability rather than by role: pages that offer writes are available only to roles with write permission, while read-only roles receive distinct views with no CRUD controls in the DOM. `SalesOrderPage` is therefore the current administrative view, restricted to `ADMIN`; future supervisor and reseller views will be separate read-only pages backed by the scoped `GET /api/sales-orders`, and must not be folded back into the administrative page through role-based conditionals.
+
+The sales-order read scope is the living example of this separation. `SalesOrderService` already scopes `GET /api/sales-orders`, `GET /api/sales-orders/{id}`, and `GET /api/sales-orders/trash`: administrators see all matching orders, reseller administrators see their reseller's orders, and assembly supervisors see orders assigned to them. That service behavior is correct foundation rather than dead code, but the filter currently keeps those routes admin-only. Each non-admin role receives an explicit GET carve-out when its corresponding page ships.
+
+Known authorization and session debts:
+
+- There is no bootstrap path for the first `ADMIN`. Because `/api/users/**` is admin-only and the repository has neither a seeder nor versioned data SQL, a clean installation cannot create its first administrator through application flows. This is especially relevant to the demo environment.
+- Changing a user's password does not revoke access tokens already issued. Tokens are stateless and live for `JWT_LIFETIME_SECONDS`, which defaults to 28,800 seconds (approximately eight hours). Setting `active=false` is the only immediate kill switch because the authentication filter reloads only active users on every request.
 
 ### Order visibility and write enforcement
 
@@ -93,18 +110,13 @@ Order scope is derived from `AppUserDetails`, whose user ID, role, and reseller 
 - `RESELLER_ADMIN`: repository queries `reseller_id` from the authenticated principal;
 - `ASSEMBLY_SUPERVISOR`: repository queries `assembly_supervisor_id` using the authenticated user's ID.
 
-The same scope is applied to direct lookup, so requesting another party's order produces the same not-found result as a nonexistent ID. `SalesOrderService.requireWriteAccess` separately rejects all mutations unless the principal is `ADMIN`. This service-layer enforcement is the authoritative protection because browser route guards only hide UI.
-
-There are two current authorization/UI gaps worth preserving as explicit risks:
-
-- `SecurityConfig` restricts `/api/users/**` to `ADMIN`, but reseller and inventory endpoints fall through to `anyRequest().authenticated()`. Their frontend routes are admin-only, yet a non-admin authenticated caller can bypass the UI and call those backend APIs. Backend role checks are still required.
-- The sales-order list route is available to all roles, but `SalesOrderPage` currently renders New, Trash, Edit, and Delete controls without checking the role. Protected routes block navigation to admin pages and the service blocks order mutations, but the read-only UI is misleading. The stale comment in `App.tsx` saying supervisor filtering is a future phase contradicts the already implemented backend filtering.
+The same scope is applied to direct lookup, so requesting another party's order produces the same not-found result as a nonexistent ID. `SalesOrderService.requireWriteAccess` separately rejects all mutations unless the principal is `ADMIN`. The filter currently restricts the whole sales-order API to administrators; the service checks remain defense in depth and preserve the scope needed by future non-admin carve-outs. Browser route guards only hide UI and are never an authorization boundary.
 
 ## 5. Backend architecture
 
 Controllers define HTTP contracts and delegate to feature services. Services enforce domain rules and map mutable JPA entities to record DTOs; entities are not public API contracts. Constructor injection is standard. The newer reseller, user, item, and category services declare transaction boundaries; sales-order writes mostly call repository `save` directly, while bulk deletion is explicitly transactional.
 
-`SecurityConfig` uses stateless sessions, disables CSRF for the bearer-token API, permits CORS preflights, exposes `Location`, and allows one configured frontend origin. Any route not explicitly listed requires authentication.
+`SecurityConfig` uses stateless sessions, disables CSRF for the bearer-token API, permits CORS preflights, exposes `Location`, and allows one configured frontend origin. Any route not explicitly carved out requires `ADMIN`.
 
 `GlobalExceptionHandler` currently maps JPA `EntityNotFoundException` to 404 and Bean Validation failures to 400. Several feature exceptions instead carry `@ResponseStatus` (notably 404, 409, and 422), while unannotated exceptions still rely on framework defaults. Error bodies and classification are therefore not centralized in one uniform contract.
 
@@ -152,26 +164,26 @@ Items have internal codes, descriptive data, measurement unit, quantity, active 
 
 ## 7. API contract
 
-All endpoints except login require a valid bearer token. The table describes the main current surface; role restrictions listed here include service-level rules, not merely frontend visibility.
+All endpoints except login require a valid bearer token, and application endpoints are admin-only unless explicitly carved out. The table describes the main current surface; latent service-level scoping is noted separately from access currently granted by the filter.
 
 | Method | Path | Purpose | Access |
 |---|---|---|---|
 | POST | `/api/auth/login` | Exchange credentials for JWT and user summary | Public |
 | GET | `/api/auth/me` | Validate token and return current user | Authenticated |
 | POST/GET/PUT/DELETE/PATCH | `/api/users/**` | Account CRUD/search, supervisor options, password, trash/restore | `ADMIN` |
-| GET | `/api/resellers` | Active compact options (`id`, `name`) | Authenticated currently |
-| GET | `/api/resellers/details` | Full active administrative list | Authenticated currently; frontend admin-only |
-| POST, GET by ID, PUT, DELETE | `/api/resellers[/{id}]` | Create/read/update/soft-delete reseller | Authenticated currently; frontend admin-only |
-| GET | `/api/resellers/trash` | Full inactive reseller list | Authenticated currently; frontend admin-only |
-| POST | `/api/resellers/{id}/activate` | Restore reseller | Authenticated currently; frontend admin-only |
-| POST | `/api/sales-orders` | Create order with optional supervisor | `ADMIN` in service |
-| GET | `/api/sales-orders` | Active orders, newest first and principal-scoped | Authenticated; role-scoped SQL query |
-| GET | `/api/sales-orders/{id}` | Principal-scoped order lookup | Authenticated; role-scoped lookup |
-| PUT/DELETE | `/api/sales-orders/{id}` | Update or soft-delete order | `ADMIN` in service |
-| PATCH | `/api/sales-orders/{id}/activate` | Restore order | `ADMIN` in service |
-| PATCH | `/api/sales-orders/bulk-soft-delete` | Atomically soft-delete IDs | `ADMIN` in service; no frontend client |
-| GET | `/api/sales-orders/trash` | Inactive orders, principal-scoped | Authenticated; frontend route admin-only |
-| CRUD-like routes | `/api/items/**`, `/api/categories/**` | Inventory administration | Authenticated currently; frontend admin-only |
+| GET | `/api/resellers` | Active compact options (`id`, `name`) | `ADMIN` |
+| GET | `/api/resellers/details` | Full active administrative list | `ADMIN` |
+| POST, GET by ID, PUT, DELETE | `/api/resellers[/{id}]` | Create/read/update/soft-delete reseller | `ADMIN` |
+| GET | `/api/resellers/trash` | Full inactive reseller list | `ADMIN` |
+| POST | `/api/resellers/{id}/activate` | Restore reseller | `ADMIN` |
+| POST | `/api/sales-orders` | Create order with optional supervisor | `ADMIN` |
+| GET | `/api/sales-orders` | Active orders, newest first and principal-scoped | `ADMIN` currently; non-admin service scopes await page-coupled carve-outs |
+| GET | `/api/sales-orders/{id}` | Principal-scoped order lookup | `ADMIN` currently; non-admin service scopes await page-coupled carve-outs |
+| PUT/DELETE | `/api/sales-orders/{id}` | Update or soft-delete order | `ADMIN` |
+| PATCH | `/api/sales-orders/{id}/activate` | Restore order | `ADMIN` |
+| PATCH | `/api/sales-orders/bulk-soft-delete` | Atomically soft-delete IDs | `ADMIN`; no frontend client |
+| GET | `/api/sales-orders/trash` | Inactive orders, principal-scoped | `ADMIN` currently; non-admin service scopes await page-coupled carve-outs |
+| CRUD-like routes | `/api/items/**`, `/api/categories/**` | Inventory administration | `ADMIN` |
 
 `GET /api/users/supervisors?resellerId=<id>` returns active `ASSEMBLY_SUPERVISOR` options (`id`, `name`) for one reseller and is used by both sales-order forms.
 
@@ -189,7 +201,7 @@ The backend repeats all authoritative checks: active reseller, admin write acces
 
 ### List orders
 
-The frontend always calls the same `GET /api/sales-orders`; the backend chooses the repository query from the authenticated principal. The current desktop-oriented table shows code, name, reseller, status badge, creation date, and an ActionMenu. Status is hidden below 900px; essential columns retain a minimum width and the table container scrolls horizontally on narrower screens. The backend returns supervisor data, but the general list intentionally does not currently display it.
+The current admin page calls `GET /api/sales-orders`. The backend retains principal-derived repository selection for the non-admin pages and filter carve-outs that will ship later. The desktop-oriented table shows code, name, reseller, status badge, creation date, and an ActionMenu. Status is hidden below 900px; essential columns retain a minimum width and the table container scrolls horizontally on narrower screens. The backend returns supervisor data, but the general list intentionally does not currently display it.
 
 ### Reseller administration
 
@@ -218,7 +230,7 @@ Core relational invariants include unique reseller document, unique user email, 
 
 Pages use local React state and effects; there is no query cache, global business store, or form library. Authentication is the exception: `AuthContext` holds the current session globally. All feature clients use shared `apiFetch`, which centralizes `VITE_API_URL`, bearer headers, and 401 handling; direct feature-level `fetch` is not the established pattern.
 
-Routes use consistent feature paths such as `/sales-orders`, `/items`, and `/resellers`. Create/edit/trash inventory, reseller, and order pages are admin-only; the sales-order list is authenticated for every role. There is no separate sales-order detail route.
+Routes use consistent feature paths such as `/sales-orders`, `/items`, and `/resellers`. Inventory, reseller, and sales-order pages are currently admin-only. There is no separate sales-order detail route.
 
 ### Navigation and actions
 
@@ -265,6 +277,7 @@ The Dockerfile and environment-driven configuration can support a container back
 | Decision | Why it matters | Current limitation |
 |---|---|---|
 | Stateless JWT with server-side user reload | Scales without HTTP sessions and deactivated accounts stop working | No token revocation before expiry; token is in localStorage |
+| Fail-closed route authorization | New roles receive no API access accidentally | Non-admin access must ship through explicit page-coupled carve-outs |
 | Principal-derived order scope | Prevents a client from choosing another reseller/user scope | Must be repeated for every future order query |
 | Service-level admin check for order writes | Protects mutations even when UI controls are bypassed | Other admin modules do not yet repeat this backend role enforcement |
 | Optional supervisor constrained to reseller | Prevents cross-reseller assignment and represents orders without factory assembly | Conditional rule is service-level, not a database constraint |
@@ -275,9 +288,9 @@ The Dockerfile and environment-driven configuration can support a container back
 
 ## 13. Technical debt and risks
 
-- **Authorization gap outside orders/users:** reseller, item, and category APIs require authentication but not `ADMIN` in backend security/service rules, despite admin-only frontend routes.
-- **Read-only order UI gap:** non-admin roles can see write controls on `SalesOrderPage`; enforcement is safe on the backend but the interface is misleading.
-- **Incomplete reseller-admin frontend contract:** the backend and JWT response support `RESELLER_ADMIN`, but the frontend `UserRole` union and navigation map omit it. At runtime the role receives an empty sidebar and lacks role-specific labels/guards, although the general authenticated order-list route can still render.
+- **No first-admin bootstrap:** a clean installation cannot create its first administrator through an application flow; the demo environment needs an operational bootstrap mechanism.
+- **Password changes do not revoke tokens:** an issued token remains usable until expiry unless the account is deactivated.
+- **Incomplete reseller-admin frontend contract:** the backend and JWT response support `RESELLER_ADMIN`, but the frontend `UserRole` union and navigation map omit it. The role has no application page or API carve-out yet.
 - **Count-based sales-order codes:** concurrent creates and unusual row histories can collide.
 - **Minimal automated coverage:** one context-load backend test, no frontend tests, and no focused authorization/visibility tests.
 - **Exception inconsistency:** the global advice does not provide one stable error envelope/status mapping for all feature exceptions and access failures.
@@ -293,8 +306,8 @@ The Dockerfile and environment-driven configuration can support a container back
 
 - Confirm reseller/customer semantics and whether multi-tenancy extends beyond the current reseller scope.
 - Define sales-order status transitions, cancellation semantics, numbering allocation, and whether inactive orders may be directly read.
-- Add consistent backend authorization for reseller and inventory administration.
-- Decide the intended `RESELLER_ADMIN` frontend navigation and remove/disable order write controls for read-only roles.
+- Define and ship the page-coupled read carve-outs for assembly-supervisor and reseller-admin sales-order views.
+- Decide the intended `RESELLER_ADMIN` frontend navigation.
 - Decide whether the legacy `Product` model is removed, migrated, or retained separately from items.
 - Define inventory ledger, movements, reservations, and sales-order line relationships.
 - Establish pagination/filter/search contracts and timestamp/time-zone policy.

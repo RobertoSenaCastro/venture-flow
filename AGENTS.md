@@ -36,5 +36,6 @@ The frontend currently has no automated test script.
 - Frontend: feature folders contain `api`, `components`, `pages`, and `types`; components/pages use `PascalCase`, functions and variables `camelCase`, and type-only imports use `import type`. API calls use `fetch` and read the base URL from `VITE_API_URL`.
 - Keep entities out of public API contracts; preserve DTO mapping methods such as `Response.from(entity)`.
 - Add validation at API boundaries and keep transaction boundaries in services.
+- Security is fail-closed: every route requires `ADMIN` by default in `SecurityConfig`. Granting another role access requires an explicit carve-out above `anyRequest`, and that carve-out ships in the same commit as the page that consumes it—never earlier. See `PROJECT_CONTEXT.md`.
 
 See [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) before changing domain behavior, API contracts, persistence, or deployment configuration.
