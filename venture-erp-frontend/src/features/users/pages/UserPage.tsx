@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { useAuth } from "../../auth/AuthContext";
 import { ROLE_LABELS } from "../../auth/roleLabels";
 import ActionMenu from "../../../shared/components/ActionMenu";
 import BackButton from "../../../shared/components/BackButton";
@@ -9,6 +10,7 @@ import type { User } from "../types/user";
 import "../styles/UserPage.css";
 
 function UserPage() {
+  const { user: authenticatedUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -147,22 +149,24 @@ function UserPage() {
                     {user.resellerName ?? "—"}
                   </td>
                   <td className="user-actions">
-                    <ActionMenu
-                      ariaLabel={`Abrir opções para ${user.name}`}
-                      items={[
-                        {
-                          label:
-                            deactivatingId === user.id
-                              ? "Desativando..."
-                              : "Desativar",
-                          variant: "danger",
-                          disabled: deactivatingId === user.id,
-                          onClick: () => {
-                            void handleDeactivateUser(user);
+                    {user.id !== authenticatedUser?.userId && (
+                      <ActionMenu
+                        ariaLabel={`Abrir opções para ${user.name}`}
+                        items={[
+                          {
+                            label:
+                              deactivatingId === user.id
+                                ? "Desativando..."
+                                : "Desativar",
+                            variant: "danger",
+                            disabled: deactivatingId === user.id,
+                            onClick: () => {
+                              void handleDeactivateUser(user);
+                            },
                           },
-                        },
-                      ]}
-                    />
+                        ]}
+                      />
+                    )}
                   </td>
                 </tr>
               ))}
