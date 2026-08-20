@@ -16,7 +16,7 @@ export interface ResellerRequest {
   documentNumber: string;
 }
 
-export interface ResellerFormData extends ResellerRequest {}
+export type ResellerFormData = ResellerRequest;
 
 export const INITIAL_RESELLER_FORM_DATA: ResellerFormData = {
   name: "",
