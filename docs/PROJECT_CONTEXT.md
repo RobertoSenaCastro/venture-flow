@@ -300,6 +300,9 @@ The Dockerfile and environment-driven configuration can support a container back
 - **Legacy inventory overlap:** `Product` coexists with the active `Item` model without a documented migration/removal decision.
 - **Status transitions unrestricted:** orders can move directly between any enum values.
 - **Dependency mismatch:** direct React Router packages use different major versions.
+- **Authentication initialization lint debt:** `AuthContext.tsx:43` calls `setState` synchronously in the session-initialization effect (`react-hooks/set-state-in-effect`). The fix changes the authentication initialization lifecycle and should be reviewed alongside a session-reload test rather than treated as mechanical cleanup.
+- **Authentication Fast Refresh lint debt:** `AuthContext.tsx:110` exports `useAuth` from the same file as the provider (`react-refresh/only-export-components`). This is cosmetic and affects Fast Refresh rather than runtime behavior; resolve it by extracting the hook into its own module or suppressing the rule.
+- **Floating UI callback-ref lint debt:** `ActionMenu.tsx:72` reports `refs.setFloating` as ref access during render (`react-hooks/refs`). This is likely a false positive for Floating UI's idiomatic callback-ref API; confirm that assessment and suppress the rule with a justification comment.
 - **Deployment unspecified:** no CI/CD or provider-specific infrastructure/configuration is checked in.
 
 ## 14. Pending architecture decisions
