@@ -2,6 +2,19 @@
   margin-bottom: 28px;
 }
 
+.users-page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.users-trash-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .users-empty-state {
   display: grid;
   min-height: 390px;
@@ -105,5 +118,12 @@
 
   .user-reseller-column {
     display: none;
+  }
+}
+
+@media (max-width: 750px) {
+  .users-page-header-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

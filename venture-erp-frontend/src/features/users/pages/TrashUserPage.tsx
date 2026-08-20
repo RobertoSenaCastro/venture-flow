@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 import { ROLE_LABELS } from "../../auth/roleLabels";
 import ActionMenu from "../../../shared/components/ActionMenu";
 import BackButton from "../../../shared/components/BackButton";
-import { deactivateUser, getUsers } from "../api/userApi";
+import { activateUser, getUserTrash } from "../api/userApi";
 import type { User } from "../types/user";
 import "../styles/UserPage.css";
 
-function UserPage() {
+function TrashUserPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [deactivatingId, setDeactivatingId] = useState<number | null>(null);
-  const [deactivateError, setDeactivateError] = useState("");
+  const [restoringId, setRestoringId] = useState<number | null>(null);
+  const [restoreError, setRestoreError] = useState("");
 
   useEffect(() => {
     let isCancelled = false;
@@ -23,17 +22,17 @@ function UserPage() {
       setLoadError("");
 
       try {
-        const loadedUsers = await getUsers();
+        const deletedUsers = await getUserTrash();
 
         if (!isCancelled) {
-          setUsers(loadedUsers);
+          setUsers(deletedUsers);
         }
       } catch (error: unknown) {
         if (!isCancelled) {
           setLoadError(
             error instanceof Error
               ? error.message
-              : "Ocorreu um erro inesperado ao carregar os usuários.",
+              : "Ocorreu um erro inesperado ao carregar a lixeira de usuários.",
           );
         }
       } finally {
@@ -50,52 +49,50 @@ function UserPage() {
     };
   }, []);
 
-  async function handleDeactivateUser(user: User): Promise<void> {
+  async function handleRestoreUser(user: User): Promise<void> {
     const confirmed = window.confirm(
-      `Deseja desativar o usuário ${user.name}?`,
+      `Deseja restaurar o usuário ${user.name}?`,
     );
 
     if (!confirmed) {
       return;
     }
 
-    setDeactivatingId(user.id);
-    setDeactivateError("");
+    setRestoringId(user.id);
+    setRestoreError("");
 
     try {
-      await deactivateUser(user.id);
+      await activateUser(user.id);
       setUsers((currentUsers) =>
         currentUsers.filter((currentUser) => currentUser.id !== user.id),
       );
     } catch (error: unknown) {
-      setDeactivateError(
+      setRestoreError(
         error instanceof Error
           ? error.message
-          : "Ocorreu um erro inesperado ao desativar o usuário.",
+          : "Ocorreu um erro inesperado ao restaurar o usuário.",
       );
     } finally {
-      setDeactivatingId(null);
+      setRestoringId(null);
     }
   }
 
   return (
     <main className="page users-page">
-      <BackButton to="/" label="Home" />
+      <BackButton to="/users" label="Usuários" />
 
-      <header className="page-header users-page-header users-page-header-row">
-        <div>
-          <p className="eyebrow">Administração</p>
-          <h1>Usuários</h1>
-          <p className="page-description">Gerencie os usuários do sistema.</p>
-        </div>
-
-        <Link to="/users/trash" className="secondary-button users-trash-link">
-          Lixeira
-        </Link>
+      <header className="page-header users-page-header">
+        <p className="eyebrow">Administração</p>
+        <h1>Lixeira de usuários</h1>
+        <p className="page-description">
+          Visualize e restaure usuários desativados.
+        </p>
       </header>
 
       {isLoading && (
-        <section className="users-loading-card">Carregando usuários...</section>
+        <section className="users-loading-card">
+          Carregando usuários desativados...
+        </section>
       )}
 
       {loadError && (
@@ -104,19 +101,19 @@ function UserPage() {
         </section>
       )}
 
-      {deactivateError && (
+      {restoreError && (
         <section className="error-message" role="alert">
-          {deactivateError}
+          {restoreError}
         </section>
       )}
 
       {!isLoading && !loadError && users.length === 0 && (
         <section className="users-empty-state">
           <div className="users-empty-state-icon" aria-hidden="true">
-            ♙
+            ♲
           </div>
-          <h2>Nenhum usuário encontrado</h2>
-          <p>Não há usuários ativos para exibir.</p>
+          <h2>Nenhum usuário na lixeira</h2>
+          <p>Usuários desativados aparecerão aqui.</p>
         </section>
       )}
 
@@ -152,13 +149,12 @@ function UserPage() {
                       items={[
                         {
                           label:
-                            deactivatingId === user.id
-                              ? "Desativando..."
-                              : "Desativar",
-                          variant: "danger",
-                          disabled: deactivatingId === user.id,
+                            restoringId === user.id
+                              ? "Restaurando..."
+                              : "Restaurar",
+                          disabled: restoringId === user.id,
                           onClick: () => {
-                            void handleDeactivateUser(user);
+                            void handleRestoreUser(user);
                           },
                         },
                       ]}
@@ -174,4 +170,4 @@ function UserPage() {
   );
 }
 
-export default UserPage;
+export default TrashUserPage;
