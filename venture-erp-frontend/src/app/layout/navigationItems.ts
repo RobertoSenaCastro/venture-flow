@@ -20,6 +20,7 @@ const NAVIGATION_BY_ROLE: Record<UserRole, NavigationItem[]> = {
     { label: "Pedidos de venda", to: "/sales-orders", icon: "▤" },
     { label: "Estoque", to: "/items", icon: "▦" },
     { label: "Revendas", to: "/resellers", icon: "◇" },
+    { label: "Usuários", to: "/users", icon: "♙" },
   ],
   RESELLER_ADMIN: [
     { label: "Home", to: "/", icon: "⌂", end: true },

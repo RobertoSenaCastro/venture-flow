@@ -1,14 +1,8 @@
 import { NavLink, type NavLinkRenderProps } from "react-router-dom";
 import { useAuth } from "../../features/auth/AuthContext";
-import type { UserRole } from "../../features/auth/types/auth";
+import { ROLE_LABELS } from "../../features/auth/roleLabels";
 import { getNavigationItems } from "./navigationItems";
 import "./Sidebar.css";
-
-const ROLE_LABELS: Record<UserRole, string> = {
-  ADMIN: "Administrador",
-  ASSEMBLY_SUPERVISOR: "Supervisor de montagem",
-  RESELLER_ADMIN: "Representante de revenda",
-};
 
 function getLinkClass({ isActive }: NavLinkRenderProps): string {
   return isActive ? "sidebar-link active" : "sidebar-link";

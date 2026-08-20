@@ -1,0 +1,109 @@
+.users-page-header {
+  margin-bottom: 28px;
+}
+
+.users-empty-state {
+  display: grid;
+  min-height: 390px;
+  place-items: center;
+  align-content: center;
+  padding: 48px 24px;
+  border: 1px dashed #cfd6df;
+  border-radius: 15px;
+  background: white;
+  text-align: center;
+}
+
+.users-empty-state-icon {
+  display: grid;
+  width: 68px;
+  height: 68px;
+  margin-bottom: 18px;
+  place-items: center;
+  border-radius: 18px;
+  color: #2563eb;
+  background: #eff6ff;
+  font-size: 2rem;
+}
+
+.users-empty-state h2 {
+  margin: 0 0 10px;
+}
+
+.users-empty-state p {
+  margin: 0;
+  color: #657184;
+}
+
+.users-loading-card {
+  padding: 28px;
+  border: 1px solid #e2e7ee;
+  border-radius: 14px;
+  background: white;
+}
+
+.users-table-container {
+  border: 1px solid #e2e7ee;
+  border-radius: 12px;
+  background: white;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.users-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.users-table th {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dbe2ea;
+  color: #526174;
+  background: #f8fafc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.users-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid #edf0f4;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.users-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.users-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.users-table .user-name {
+  color: #172033;
+  font-weight: 600;
+}
+
+.user-email {
+  white-space: nowrap;
+}
+
+.users-actions-heading,
+.user-actions {
+  width: 72px;
+  text-align: right !important;
+}
+
+@media (max-width: 900px) {
+  .users-table {
+    min-width: 680px;
+  }
+
+  .user-reseller-column {
+    display: none;
+  }
+}
