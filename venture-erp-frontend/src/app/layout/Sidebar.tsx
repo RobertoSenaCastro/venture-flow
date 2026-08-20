@@ -7,7 +7,7 @@ import "./Sidebar.css";
 const ROLE_LABELS: Record<UserRole, string> = {
   ADMIN: "Administrador",
   ASSEMBLY_SUPERVISOR: "Supervisor de montagem",
-  RESELLER_ADMIN: "Administrador de revenda",
+  RESELLER_ADMIN: "Representante de revenda",
 };
 
 function getLinkClass({ isActive }: NavLinkRenderProps): string {
