@@ -16,6 +16,7 @@ import CreateResellerPage from "./features/reseller/pages/CreateResellerPage";
 import EditResellerPage from "./features/reseller/pages/EditResellerPage";
 import TrashResellerPage from "./features/reseller/pages/TrashResellerPage";
 import UserPage from "./features/users/pages/UserPage";
+import EditUserPage from "./features/users/pages/EditUserPage";
 import TrashUserPage from "./features/users/pages/TrashUserPage";
 
 import { LoginPage } from "./features/auth/pages/LoginPage";
@@ -154,6 +155,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <UserPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/:userId/edit"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <EditUserPage />
               </ProtectedRoute>
             }
           />

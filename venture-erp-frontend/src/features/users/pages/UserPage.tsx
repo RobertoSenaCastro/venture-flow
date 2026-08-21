@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../auth/AuthContext";
 import { ROLE_LABELS } from "../../auth/roleLabels";
@@ -10,6 +10,7 @@ import type { User } from "../types/user";
 import "../styles/UserPage.css";
 
 function UserPage() {
+  const navigate = useNavigate();
   const { user: authenticatedUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -149,24 +150,32 @@ function UserPage() {
                     {user.resellerName ?? "—"}
                   </td>
                   <td className="user-actions">
-                    {user.id !== authenticatedUser?.userId && (
-                      <ActionMenu
-                        ariaLabel={`Abrir opções para ${user.name}`}
-                        items={[
-                          {
-                            label:
-                              deactivatingId === user.id
-                                ? "Desativando..."
-                                : "Desativar",
-                            variant: "danger",
-                            disabled: deactivatingId === user.id,
-                            onClick: () => {
-                              void handleDeactivateUser(user);
-                            },
+                    <ActionMenu
+                      ariaLabel={`Abrir opções para ${user.name}`}
+                      items={[
+                        {
+                          label: "Editar",
+                          onClick: () => {
+                            navigate(`/users/${user.id}/edit`);
                           },
-                        ]}
-                      />
-                    )}
+                        },
+                        ...(user.id !== authenticatedUser?.userId
+                          ? [
+                              {
+                                label:
+                                  deactivatingId === user.id
+                                    ? "Desativando..."
+                                    : "Desativar",
+                                variant: "danger" as const,
+                                disabled: deactivatingId === user.id,
+                                onClick: () => {
+                                  void handleDeactivateUser(user);
+                                },
+                              },
+                            ]
+                          : []),
+                      ]}
+                    />
                   </td>
                 </tr>
               ))}
